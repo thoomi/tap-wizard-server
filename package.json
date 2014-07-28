@@ -1,0 +1,27 @@
+{
+  "name": "tap-wizard-server",
+  "version": "0.0.2",
+  "description": "The server implementation for tap wizard",
+  "homepage": "http://wiz.herokuapp.com",
+  "license": "MIT",
+  "author": "Thomas Blank <thomas.blank@fh-erfurt.de> (https://github.com/thoomi)",
+  "scripts": {
+    "test": "mocha -R spec test/**/*.js "
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "dependencies": {
+    "socket.io": "1.0.x"
+  },
+  "devDependencies": {
+    "mocha": "1.20.x",
+    "should": "4.0.x",
+    "grunt": "0.4.x",
+    "grunt-concurrent": "0.5.x",
+    "grunt-contrib-jshint": "0.10.x",
+    "grunt-contrib-watch": "0.6.x",
+    "grunt-nodemon": "0.3.x",
+    "socket.io-client": "1.0.x"
+  }
+}
