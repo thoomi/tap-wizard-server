@@ -6,6 +6,10 @@
 module.exports = exports = Client;
 
 
+var NetworkState = {
+	ONLINE  : 'online',
+	OFFLINE : 'offline'
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \fn Client()
@@ -14,12 +18,13 @@ module.exports = exports = Client;
 ////////////////////////////////////////////////////////////////////////////////
 function Client (_id) {
     // -----------------------------------------------------------------------------
-    // The parameters are essential, thus test if they are set, otherwise throw error
+    // The parameters are essential, thus test if they are set, otherwise throw error.
     // -----------------------------------------------------------------------------
     if (typeof(_id) === 'undefined') { throw new Error('_id parameter in Net::Client constructor is undefined.'); }
 
 	// -----------------------------------------------------------------------------
-    // Private member attributes.
+    // Member attributes.
     // -----------------------------------------------------------------------------
-	this.m_id = _id;
+	this.m_id    = _id;
+	this.m_state = NetworkState.OFFLINE;
 }

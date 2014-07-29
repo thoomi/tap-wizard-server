@@ -1,5 +1,6 @@
 var should = require('should');
 var Player = require('../../server/data/data_player.js');
+var Card   = require('../../server/data/data_card.js');
 
 
 describe('DATA.Player', function () {
@@ -14,4 +15,5 @@ describe('DATA.Player', function () {
 			player.getId().should.equal(567);
 		});
 	});
+
 });

@@ -3,48 +3,31 @@
 /// Declares the name of the object which will be available through the 
 /// require() function
 ////////////////////////////////////////////////////////////////////////////////
-module.exports = exports = GameTable;
+module.exports = exports = PlayerManager;
 
 
-function GameTable (_gameId) {
+function PlayerManager () {
     // -----------------------------------------------------------------------------
-    // The parameters are essential, thus test if they are set, otherwise throw error
+    // All players are saved here 
     // -----------------------------------------------------------------------------
-    if (typeof(_gameId) === 'undefined') { throw new Error('_gameId parameter in DATA::GameTable constructor is undefined.'); }
-
-
-    this.m_gameId       = _gameId;
-	this.m_cardsOnTable = [];
-	this.m_players      = [];
-    this.m_stats        = null;
+    this.m_players = [];
 
 
     ////////////////////////////////////////////////////////////////////////////////
-    /// \fn setCardDeck(_deck)
-    ///
-    /// \brief Sets the card deck
-    ///
-    /// \param _deck The 
-    ////////////////////////////////////////////////////////////////////////////////
-    this.addPlayer = function (_player) {
-        this.m_players.push(_player);
-    };
-
-	////////////////////////////////////////////////////////////////////////////////
     /// \fn addPlayer(_player)
     ///
-    /// \brief Adds a player to the gametable
+    /// \brief Adds a player 
     ///
     /// \param _player The player instance to add
     ////////////////////////////////////////////////////////////////////////////////
-	this.addPlayer = function (_player) {
+    this.addPlayer = function (_player) {
         this.m_players.push(_player);
     };
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn removePlayerById(_id)
     ///
-    /// \brief Removes a player from the gametable by its id
+    /// \brief Removes a player 
     ///
     /// \param _id The id of the player which should be removed
     ////////////////////////////////////////////////////////////////////////////////
@@ -67,15 +50,18 @@ function GameTable (_gameId) {
     /// \return the index of the player (-1 if not player has been found)
     ////////////////////////////////////////////////////////////////////////////////
     this.getIndexOfPlayerById = function (_id) {
+        var resultPlayerIndex = -1;
+
         for (var indexOfPlayer = 0; indexOfPlayer < this.m_players.length; indexOfPlayer++) 
         {
             if(this.m_players[indexOfPlayer].getId() === _id) 
             {
-                return indexOfPlayer;
+                resultPlayerIndex = indexOfPlayer;
+                break;
             }
         }
 
-        return -1;
+        return resultPlayerIndex;
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -84,16 +70,16 @@ function GameTable (_gameId) {
     /// \brief Looks up a player by a given id
     ///
     /// \param _id The id of the player to look for
-    /// \return the index of the player (-1 if not player has been found)
+    /// \return the constructor instance of the player (if not found null)
     ////////////////////////////////////////////////////////////////////////////////
     this.getPlayerById = function (_id) {
-    	var player = null;
-    	var indexOfPlayer = this.getIndexOfPlayerById(_id);
+        var player = null;
+        var indexOfPlayer = this.getIndexOfPlayerById(_id);
 
-    	if (indexOfPlayer !== -1)
-    	{
-    		player = this.m_players[indexOfPlayer];
-    	}
+        if (indexOfPlayer !== -1)
+        {
+            player = this.m_players[indexOfPlayer];
+        }
 
         return player;
     };

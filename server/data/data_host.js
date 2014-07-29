@@ -18,12 +18,12 @@ function Host (params) {
 	// -----------------------------------------------------------------------------
     // The parameters are essential, thus test if they are set, otherwise throw error
     // -----------------------------------------------------------------------------
-	if (typeof(params.id) === 'undefined') { throw new Error('id parameter in DATA::Player constructor is undefined.'); }
+	if (typeof(params.id) === 'undefined') { throw new Error('id parameter in DATA::Host constructor is undefined.'); }
 
 	// -----------------------------------------------------------------------------
     // Private member attributes.
     // -----------------------------------------------------------------------------
-	this.m_id   = params.id;
+	this.m_id = params.id;
 
 
 	////////////////////////////////////////////////////////////////////////////////

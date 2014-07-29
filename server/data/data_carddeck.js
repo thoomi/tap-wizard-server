@@ -1,7 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Dependencies
 ////////////////////////////////////////////////////////////////////////////////
-var util = require('../core/util.js');
+var CORE  = CORE || {};
+CORE.util = require('../core/core_util.js');
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Module exports
@@ -15,7 +16,7 @@ function CardDeck () {
 	// -----------------------------------------------------------------------------
     // availableCards[] => Those cards which are in the card deck and are available
     // for distribution to players. Typically represents a complete set of cards 
-    // (Wizards complete set consists of 60 cards)
+    // (Wizards complete set consists of 60 cards).
     // -----------------------------------------------------------------------------
     this.m_availableCards = [];
 
@@ -71,7 +72,7 @@ function CardDeck () {
     /// call this function first in order to shuffle the available cards
     ////////////////////////////////////////////////////////////////////////////////
     this.shuffle = function () {
-    	util.shuffleArray(this.m_availableCards);
+    	CORE.util.shuffleArray(this.m_availableCards);
     };
 
 
