@@ -13,6 +13,17 @@ DATA.config = require('./data_player_manager.js');
 module.exports = exports = GameRoom;
 
 
+////////////////////////////////////////////////////////////////////////////////
+/// Game room states as static constructor members
+////////////////////////////////////////////////////////////////////////////////
+GameRoom.States = {
+    DEFAULT : 'default',
+    WAITING : 'waiting',
+    RUNNING : 'running',
+    OVER    : 'over'
+};
+
+
 function GameRoom (_gameId) {
     // -----------------------------------------------------------------------------
     // The parameters are essential, thus test if they are set, otherwise throw error.
@@ -24,6 +35,8 @@ function GameRoom (_gameId) {
     // -----------------------------------------------------------------------------
     this.m_id            = _gameId;
 	this.m_cardsOnTable  = [];
+    this.m_gameRoomLogic = null;
+    this.m_currentState  = this.States.DEFAULT;
 
     // -----------------------------------------------------------------------------
     // m_playerManager => The object which manages the players for the game room.
@@ -39,5 +52,33 @@ function GameRoom (_gameId) {
     ////////////////////////////////////////////////////////////////////////////////
     this.getId = function() {
         return this.m_id;
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn setPlayerId()
+    ///
+    /// \brief Set the players id in the game
+    ////////////////////////////////////////////////////////////////////////////////
+    this.setGameRoomLogic = function(_gameRoomLogic) {
+        this.m_gameRoomLogic = _gameRoomLogic;
+    };
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn setState()
+    ///
+    /// \brief Set the players id in the game
+    ////////////////////////////////////////////////////////////////////////////////
+    this.setState = function(_state) {
+        this.m_currentState = _state;
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn getState()
+    ///
+    /// \brief Getter for the players id
+    ////////////////////////////////////////////////////////////////////////////////
+    this.getState = function() {
+        return this.m_currentState;
     };
 }

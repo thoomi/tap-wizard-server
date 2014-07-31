@@ -32,7 +32,7 @@ function GameRoomManager () {
         // -----------------------------------------------------------------------------
         // TODO: Develop a proper way to generate a unique game id
         // -----------------------------------------------------------------------------
-        var gameId = ( Math.random() * 100 ) | 0;
+        var gameId = ( Math.random() * 1000 ) | 0;
 
         // -----------------------------------------------------------------------------
         // Instantiate a new game room and save it to the array with its id as key
@@ -40,9 +40,9 @@ function GameRoomManager () {
         this.m_gameRooms[gameId] = new DATA.GameRoom(gameId);
 
         // -----------------------------------------------------------------------------
-        // Finally return the game id, so that other modules can use it as identifier
+        // Finally return the game so that other modules can use its id as reference
         // -----------------------------------------------------------------------------
-        return gameId;
+        return this.m_gameRooms[gameId];
     };
 
 

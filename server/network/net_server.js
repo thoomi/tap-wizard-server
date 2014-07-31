@@ -47,6 +47,12 @@ var NetworkEvent = {
 function Server () {
 
     this.m_io      = null;
+
+    // -----------------------------------------------------------------------------
+    // m_clients[] => Keeps track of all connected network clients. If a new network
+    // message comes in, it is possible to look up the actual player by its socket id
+    // or its actual id in the game
+    // -----------------------------------------------------------------------------
 	this.m_clients = [];
 
 
