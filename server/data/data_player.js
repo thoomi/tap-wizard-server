@@ -1,10 +1,4 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// Dependencies
-////////////////////////////////////////////////////////////////////////////////
-var DATA         = DATA || {};
-DATA.PlayerStats = require('./data_player_manager.js');
-
-////////////////////////////////////////////////////////////////////////////////
 /// Module exports
 /// Declares the name of the object which will be available through the 
 /// require() function
@@ -33,11 +27,7 @@ function Player (_params) {
 	this.m_id    = _params.id;
 	this.m_name  = _params.name;
 
-    // -----------------------------------------------------------------------------
-    // stats => The object which manages all player specific stats like tricks per
-    // round, guessed tricks, etc...
-    // -----------------------------------------------------------------------------
-    this.m_stats = new DATA.PlayerStats(); 
+    this.m_playerLogic = null;
 
     // -----------------------------------------------------------------------------
     // setOfCards[] => The current set of cards which the "real" player has on its 
@@ -64,6 +54,14 @@ function Player (_params) {
         return this.m_name;
     };
 
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn setPlayerLogic()
+    ///
+    /// \brief Sets the logic representation of the player
+    ////////////////////////////////////////////////////////////////////////////////
+    this.setPlayerLogic = function(_playerLogic) {
+        this.m_playerLogic = _playerLogic;
+    };
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn addCard()

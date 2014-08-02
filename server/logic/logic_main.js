@@ -8,9 +8,11 @@ DATA.Player = require('../data/data_player.js');
 
 var LOGIC = LOGIC || {};
 LOGIC.GameRoom = require('./logic_gameroom.js');
+LOGIC.Player   = require('./logic_player.js');
 
 var NETWORK = NETWORK || {};
 NETWORK.Server = require('../network/net_server.js');
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Module exports
@@ -24,6 +26,9 @@ module.exports = exports = new LogicMain();
 /// \fn LogicMain()
 ///
 /// \brief Entry point for the logic controller
+///
+/// This is the main object which manages all incomming and outcomming events.
+/// Every dispatched event should maybe go through this object.
 ////////////////////////////////////////////////////////////////////////////////
 function LogicMain () {
 
@@ -77,7 +82,7 @@ function LogicMain () {
         ///
         /// \brief Creates and opens a new game room
         ////////////////////////////////////////////////////////////////////////////////
-        this.openNewGameRoom = function() {
+        this.createNewGameRoom = function() {
             // -----------------------------------------------------------------------------
             // Create a new data game room and connect it with the game room logic part
             // -----------------------------------------------------------------------------
@@ -91,11 +96,6 @@ function LogicMain () {
             // Set the game room to waiting for users state
             // -----------------------------------------------------------------------------
             gameRoomData.setState(DATA.GameRoom.States.WAITING);
-
-            // -----------------------------------------------------------------------------
-            // TODO: Notify creator that everything has been created. Maybe something like 
-            // an emit or done().
-            // -----------------------------------------------------------------------------
         };
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -114,16 +114,25 @@ function LogicMain () {
                 // Generate unique id and create a player
                 // -----------------------------------------------------------------------------
                 var playerId = ( Math.random() * 1000 ) | 0;
-                var player = new DATA.Player({ id: playerId, name: _playerName });
+                var playerData  = new DATA.Player({ id: playerId, name: _playerName });
+                var playerLogic = new LOGIC.Player();
+
+                // -----------------------------------------------------------------------------
+                // Connect player to the logic representation
+                // -----------------------------------------------------------------------------
+                playerData.setPlayerLogic(playerLogic);
+                playerLogic.setPlayerData(playerData);
+
 
                 // -----------------------------------------------------------------------------
                 // Add the fresh player to the game room
                 // -----------------------------------------------------------------------------
-                gameRoom.addPlayer(player);
+                gameRoom.addPlayer(playerData);
 
                 // -----------------------------------------------------------------------------
                 // TODO: Notify someone or everyone? that a new player joind the game
                 // -----------------------------------------------------------------------------
+                global.EventBus.dispatch('player_joined_game');
             }
             else 
             {

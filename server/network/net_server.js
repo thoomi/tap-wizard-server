@@ -46,7 +46,7 @@ var NetworkEvent = {
 ////////////////////////////////////////////////////////////////////////////////
 function Server () {
 
-    this.m_io      = null;
+    this.m_io = null;
 
     // -----------------------------------------------------------------------------
     // m_clients[] => Keeps track of all connected network clients. If a new network

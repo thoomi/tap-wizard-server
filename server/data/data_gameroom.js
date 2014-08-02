@@ -1,8 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Dependencies
 ////////////////////////////////////////////////////////////////////////////////
-var DATA    = DATA || {};
-DATA.config = require('./data_player_manager.js');
+var DATA           = DATA || {};
+DATA.PlayerManager = require('./data_player_manager.js');
+DATA.CardDeck = require('./data_carddeck.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -17,8 +18,9 @@ module.exports = exports = GameRoom;
 /// Game room states as static constructor members
 ////////////////////////////////////////////////////////////////////////////////
 GameRoom.States = {
-    DEFAULT : 'default',
+    UNKNOWN : 'default',
     WAITING : 'waiting',
+    READY   : 'ready',
     RUNNING : 'running',
     OVER    : 'over'
 };
@@ -34,15 +36,16 @@ function GameRoom (_gameId) {
     // Member attributes.
     // -----------------------------------------------------------------------------
     this.m_id            = _gameId;
+    this.m_cardDeck      = new DATA.CardDeck();
 	this.m_cardsOnTable  = [];
     this.m_gameRoomLogic = null;
-    this.m_currentState  = this.States.DEFAULT;
+    this.m_currentState  = GameRoom.States.UNKNOWN;
 
     // -----------------------------------------------------------------------------
-    // m_playerManager => The object which manages the players for the game room.
+    // m_players => The object which manages the players for the game room.
     // It provides the functionality to add, remove and find players.
     // -----------------------------------------------------------------------------
-	this.m_playerManager = new DATA.PlayerManager();
+	this.m_players = [];
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -80,5 +83,77 @@ function GameRoom (_gameId) {
     ////////////////////////////////////////////////////////////////////////////////
     this.getState = function() {
         return this.m_currentState;
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn addPlayer(_player)
+    ///
+    /// \brief Adds a player 
+    ///
+    /// \param _player The player instance to add
+    ////////////////////////////////////////////////////////////////////////////////
+    this.addPlayer = function (_player) {
+        this.m_players.push(_player);
+    };
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn removePlayerById(_id)
+    ///
+    /// \brief Removes a player 
+    ///
+    /// \param _id The id of the player which should be removed
+    ////////////////////////////////////////////////////////////////////////////////
+    this.removePlayerById = function (_id) {
+        for (var indexOfPlayer = 0; indexOfPlayer < this.m_players.length; indexOfPlayer++) 
+        {
+            if(this.m_players[indexOfPlayer].getId() === _id) 
+            {
+                this.m_players.splice(indexOfPlayer, 1);
+            }
+        }
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn getIndexOfPlayerById(_id)
+    ///
+    /// \brief Looks up the index of a player by a given id
+    ///
+    /// \param _id The id of the player to look for
+    /// \return the index of the player (-1 if not player has been found)
+    ////////////////////////////////////////////////////////////////////////////////
+    this.getIndexOfPlayerById = function (_id) {
+        var resultPlayerIndex = -1;
+
+        for (var indexOfPlayer = 0; indexOfPlayer < this.m_players.length; indexOfPlayer++) 
+        {
+            if(this.m_players[indexOfPlayer].getId() === _id) 
+            {
+                resultPlayerIndex = indexOfPlayer;
+                break;
+            }
+        }
+
+        return resultPlayerIndex;
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn getPlayerById(_id)
+    ///
+    /// \brief Looks up a player by a given id
+    ///
+    /// \param _id The id of the player to look for
+    /// \return the constructor instance of the player (if not found null)
+    ////////////////////////////////////////////////////////////////////////////////
+    this.getPlayerById = function (_id) {
+        var player = null;
+        var indexOfPlayer = this.getIndexOfPlayerById(_id);
+
+        if (indexOfPlayer !== -1)
+        {
+            player = this.m_players[indexOfPlayer];
+        }
+
+        return player;
     };
 }

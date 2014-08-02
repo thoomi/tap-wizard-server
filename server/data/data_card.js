@@ -45,13 +45,13 @@ function Card (_params){
 
 
 	////////////////////////////////////////////////////////////////////////////////
-    /// \fn getPlayedId()
+    /// \fn getPlayerId()
     ///
     /// \brief Getter for the player id who played the card
     ///
     /// \return The id of the player who played this card
     ////////////////////////////////////////////////////////////////////////////////
-	this.getPlayedId = function () {
+	this.getPlayerId = function () {
 		return this.m_playerId;
 	};
 }
