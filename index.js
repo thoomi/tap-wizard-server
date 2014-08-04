@@ -12,14 +12,11 @@ var GameServer = require('./server/game_server.js');
 		var gameServer = new GameServer();
 
 		// -----------------------------------------------------------------------------
-	    // Call onStartup to setup all components of the server
+	    // Call onStartup to setup all components of the server. After all components 
+	    // are setup the network component is going to listen for socket events. These
+	    // events will be pushed trough to the logic.
 	    // -----------------------------------------------------------------------------
 		gameServer.onStartup();
-
-		// -----------------------------------------------------------------------------
-	    // Call onRun for convenience that everything is ready
-	    // -----------------------------------------------------------------------------
-		gameServer.onRun();
 	}
 	catch(exception) 
 	{
