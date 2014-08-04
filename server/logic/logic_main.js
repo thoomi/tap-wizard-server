@@ -95,7 +95,7 @@ function LogicMain () {
             // -----------------------------------------------------------------------------
             // Set the game room to waiting for users state
             // -----------------------------------------------------------------------------
-            gameRoomData.setState(DATA.GameRoom.States.WAITING);
+            gameRoomData.setState(DATA.GameRoom.States.WAITING_FOR_PLAYERS);
         };
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -152,17 +152,12 @@ function LogicMain () {
             // Check if the game room exists
             // -----------------------------------------------------------------------------
             var gameRoom = this.m_gameRoomManager.getRoomById(_gameId);
-            if (gameRoom && gameRoom.getState() === DATA.GameRoom.States.WAITING)
+            if (gameRoom && gameRoom.getState() === DATA.GameRoom.States.WAITING_FOR_PLAYERS)
             {
                 // -----------------------------------------------------------------------------
                 // TODO: Prapare the game room to start the first round.
                 // TODO: Notify the users that everything is prepared and the game can be started
                 // -----------------------------------------------------------------------------
-
-                // -----------------------------------------------------------------------------
-                // Set the game room to running state
-                // -----------------------------------------------------------------------------
-                gameRoom.setState(DATA.GameRoom.States.RUNNING);
             }
             else
             {

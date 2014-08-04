@@ -18,11 +18,13 @@ module.exports = exports = GameRoom;
 /// Game room states as static constructor members
 ////////////////////////////////////////////////////////////////////////////////
 GameRoom.States = {
-    UNKNOWN : 'default',
-    WAITING : 'waiting',
-    READY   : 'ready',
-    RUNNING : 'running',
-    OVER    : 'over'
+    UNKNOWN               : 'unknown',
+    WAITING_FOR_PLAYERS   : 'waiting_for_players',
+    READY_FOR_NEW_ROUND   : 'ready_for_new_round',
+    READY_TO_START        : 'ready_to_start',
+    READY_TO_GUESS_TRICKS : 'redy_to_guess_tricks',
+    READY_TO_THROW_CARDS  : 'ready_to_THROW_CARDS',
+    GAME_OVER             : 'game_over'
 };
 
 
@@ -36,7 +38,7 @@ function GameRoom (_gameId) {
     // Member attributes.
     // -----------------------------------------------------------------------------
     this.m_id            = _gameId;
-    this.m_cardDeck      = new DATA.CardDeck();
+    this.cardDeck      = new DATA.CardDeck();
 	this.m_cardsOnTable  = [];
     this.m_gameRoomLogic = null;
     this.m_currentState  = GameRoom.States.UNKNOWN;
@@ -65,7 +67,6 @@ function GameRoom (_gameId) {
     this.setGameRoomLogic = function(_gameRoomLogic) {
         this.m_gameRoomLogic = _gameRoomLogic;
     };
-
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn setState()
@@ -96,6 +97,14 @@ function GameRoom (_gameId) {
         this.m_players.push(_player);
     };
 
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn getNumberOfPlayers()
+    ///
+    /// \brief Returns the current number of players
+    ////////////////////////////////////////////////////////////////////////////////
+    this.getNumberOfPlayers = function () {
+        return this.m_players.length;
+    };
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn removePlayerById(_id)
@@ -155,5 +164,9 @@ function GameRoom (_gameId) {
         }
 
         return player;
+    };
+
+    this.forEachPlayer = function (_callback) {
+        this.m_players.forEach(_callback);
     };
 }

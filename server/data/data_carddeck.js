@@ -26,7 +26,10 @@ function CardDeck () {
     // -----------------------------------------------------------------------------
     this.m_distributedCards = [];
 
-
+    // -----------------------------------------------------------------------------
+    // numberOfCards => Counts the total number of cards in the deck
+    // -----------------------------------------------------------------------------
+    this.m_numberOfCards = 0;
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn addCard(_card)
@@ -37,6 +40,15 @@ function CardDeck () {
     ////////////////////////////////////////////////////////////////////////////////
     this.addCard = function(_card) {
     	this.m_availableCards.push(_card);
+        this.m_numberOfCards++;
+    };
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn getNumberOfCards()
+    ///
+    /// \brief Returns the total number of cards
+    ////////////////////////////////////////////////////////////////////////////////
+    this.getNumberOfCards = function() {
+        return this.m_numberOfCards;
     };
 
 
