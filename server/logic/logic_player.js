@@ -53,7 +53,6 @@ function Player () {
         this.m_roundData[this.currentRoundNumber].numberOfGuessedTricks = _numberOfGuessedTricks;
     };
 
-    this.hasGuessedTricks
 
     this.incrementWonTricks = function () {
         this.m_roundData[this.currentRoundNumber].numberOfWonTricks++;

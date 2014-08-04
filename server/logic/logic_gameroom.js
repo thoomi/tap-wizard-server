@@ -87,7 +87,7 @@ function GameRoom () {
         // Initialize new round for each player
         // -----------------------------------------------------------------------------
         this.m_gameRoomData.forEachPlayer(function(_player) {
-            _player.initializeNewRound(m_currentRound);
+            _player.initializeNewRound(this.m_currentRound);
         });
     };
 
@@ -102,16 +102,16 @@ function GameRoom () {
         // to jshint's warning. This function gets called for each player in the loop 
         // below.
         // -----------------------------------------------------------------------------
-        function addCardToPlayer(_player) {
+        /*function addCardToPlayer(_player) {
             _player.addCard(this.m_gameRoomData.cardDeck.getCard());
-        }
+        }*/
 
         // -----------------------------------------------------------------------------
         // Loop through the number of rounds and through each player per round.
         // -----------------------------------------------------------------------------
         for (var indexOfRound = 0; indexOfRound < this.m_currentRound; indexOfRound++)
         {
-            for (var indexOfPlayer = 0; indexOfPlayer < this.m_gameRoomData.getNumberOfPlayers(); indexOfPlayer++)
+            
         }
     };
 
