@@ -33,6 +33,7 @@ function GameRoom (_gameId, _hostClient) {
     this.m_lastTrickWinner = null;
     this.m_firstPlayedCard = null;
     this.m_firstPlayedSuit = null;
+    this.m_playedTricks    = 0;
 
 
 
@@ -101,7 +102,6 @@ function GameRoom (_gameId, _hostClient) {
         this.m_data.players[playerIndex].emit(global.events.out.PLAYER_BEGIN_TURN);
     };
 
-
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn dealCards()
     ///
@@ -166,7 +166,7 @@ function GameRoom (_gameId, _hostClient) {
         // ----------------------------------------------------------------------------
         var player = this.m_data.getPlayerById(_playerId);
 
-        if (player.m_hasPlayedCardInTurn)
+        if (!this.isCardAllowed())
         {
             // ----------------------------------------------------------------------------
             // Notify the player that he is not allowed to throw a card
@@ -174,7 +174,175 @@ function GameRoom (_gameId, _hostClient) {
             var data = { card: _card };
             player.emit(global.events.CARD_NOT_ALLOWED, data);
         }
-        
+        else 
+        {
+            // ----------------------------------------------------------------------------
+            // Card is allowed, though remove it form players hand cards and push it onto
+            // the game table
+            // ----------------------------------------------------------------------------
+            player.removeCard(_card);
+            player.m_hasPlayedCardInTurn = true;
+
+            this.m_data.cardsOnTable.push(_card);
+
+            // ----------------------------------------------------------------------------
+            // TODO: check game state and notify players / host about the played card
+            // ----------------------------------------------------------------------------
+        }
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn checkGameState()
+    ///
+    /// \brief Checks if it needs to update the game state by testing if a trick turn
+    ///  or a round is over
+    //////////////////////////////////////////////////////////////////////////////// 
+    this.checkGameState = function() {
+        // ----------------------------------------------------------------------------
+        // Check if the current trick turn is over. A trick turn is over if every player
+        // played exactly one card.
+        // ----------------------------------------------------------------------------
+        if (this.m_data.getNumberOfCardsOnTable() === this.m_data.getNumberOfPlayers())
+        {
+            // ----------------------------------------------------------------------------
+            // Determine the winner of the current trick turn
+            // ----------------------------------------------------------------------------
+            var winnerPlayerId = this.determineTrickWinner();
+            var winnerPlayer   = this.m_data.getPlayerId(winnerPlayerId);
+
+            winnerPlayer.m_stats.incrementWonTricks();
+            this.m_playedTricks++;
+            this.resetForNextTrickTurn();
+
+            var data = { playerName: winnerPlayer.getName() };
+            this.emitToAll(global.events.out.PLAYER_HAS_WON_TRICK, data);
+
+            // ----------------------------------------------------------------------------
+            // TODO: check if round or game is over
+            // ----------------------------------------------------------------------------
+        }
+    };
+
+    this.resetForNextTrickTurn = function() {
+        this.m_data.cardsOnTable = [];
+        this.m_firstPlayedCard   = null;
+        this.m_trumpCard         = null;
+        this.m_firstPlayedSuit   = null;
+
+        for (var indexOfPlayer = 0; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++) 
+        {
+            this.m_data.players[indexOfPlayer].m_hasPlayedCardInTurn = false;
+        }
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn determineTrickWinner()
+    ///
+    /// \brief Calculates the winner of the current trick turn
+    ///
+    /// \return The id of the player who won the trick
+    //////////////////////////////////////////////////////////////////////////////// 
+    this.determineTrickWinner = function() {
+        var foolCount      = 0;
+        var cardsToCompare = [];
+        var winnerCard     = null;
+        var indexOfCard    = 0;
+        var cardToCheck    = null;
+
+        // ----------------------------------------------------------------------------
+        // 1. Go over all cards and check if the card is either a special card or a
+        // regular playing card.
+        // ----------------------------------------------------------------------------
+        for (indexOfCard = 0; indexOfCard < this.m_data.getNumberOfCardsOnTable(); indexOfCard++)
+        {
+            cardToCheck = this.m_data.cardsOnTable[indexOfCard];
+
+            if (cardToCheck.suit === 'wizard')
+            {
+                // ----------------------------------------------------------------------------
+                // 1.1 A wizard has been played, though the player of the first wizard is the 
+                // winner of the trick turn.
+                // ----------------------------------------------------------------------------
+                return cardToCheck.getPlayerId();
+            }
+            else if (cardToCheck.suit === 'fool') 
+            {
+                // ----------------------------------------------------------------------------
+                // 1.2 Count the number of fools in the turn to determine if only fools have been
+                // played. If there are only fools on the table, the player who threw the first
+                // card wins the trick.
+                // ----------------------------------------------------------------------------
+                foolCount++;
+
+                if (this.m_data.getNumberOfCardsOnTable() === foolCount)
+                {
+                    return this.m_data.cardsOnTable[0].getPlayerId();
+                }
+            }
+            else
+            {
+                // ----------------------------------------------------------------------------
+                // 1.3 The card is neither a wizard nor a fool, therefore add it to the cards to
+                // compare array in order examine it later.
+                // ----------------------------------------------------------------------------
+                cardsToCompare.push(cardToCheck);
+            }
+        }
+
+        // ----------------------------------------------------------------------------
+        // 2. Examine all left over cards. 
+        // 2.1 Be pragmatic and set the winnerCard to be the first one out of the array.
+        // Doing this we only have to check if a card is higher / better than the 
+        // current winner card.
+        // ----------------------------------------------------------------------------
+        winnerCard = cardsToCompare[0];
+
+        // ----------------------------------------------------------------------------
+        // 2.2 Go over all left cards
+        // ----------------------------------------------------------------------------
+        for (indexOfCard = 1; indexOfCard < cardsToCompare.length; indexOfCard++)
+        {
+            cardToCheck = this.m_data.cardsOnTable[indexOfCard];
+            // ----------------------------------------------------------------------------
+            // 2.2.1 Check if the suits match, then check if the value is higher than the
+            // one of the current winner card
+            // ----------------------------------------------------------------------------
+            if (cardToCheck.suit === winnerCard.suit) 
+            {
+                if (cardToCheck.value > winnerCard.value)
+                {
+                    winnerCard = cardToCheck;
+                }
+            }
+            else
+            {
+                // ----------------------------------------------------------------------------
+                // 2.2.2 The suits do not match, therefore we need to check if the card to check
+                // is a trump. If it isn't, the card can be ignored.
+                // ----------------------------------------------------------------------------
+                if (this.m_trumpCard !== null && cardToCheck.suit === this.m_trumpCard.suit)
+                {
+                    // ----------------------------------------------------------------------------
+                    // 2.2.3 Check if the current winner card is also a trump and if so compare 
+                    // their values. If not, the cardToCheck is a trump and the current winner 
+                    // card isn't. 
+                    // ----------------------------------------------------------------------------
+                    if (winnerCard.suit === this.m_trumpCard.suit)
+                    {
+                        if (cardToCheck.value > winnerCard.value)
+                        {
+                            winnerCard = cardToCheck;
+                        }
+                    }
+                    else
+                    {
+                        winnerCard = cardToCheck;
+                    }
+                }
+            }
+        }
+
+        return winnerCard.getPlayerId();
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +394,7 @@ function GameRoom (_gameId, _hostClient) {
             // ----------------------------------------------------------------------------
             // Check if the the _card is a wizard of a fool
             // ----------------------------------------------------------------------------
-            if (_card.suit === 'wizard' || _card.suit == 'fool')
+            if (_card.suit === 'wizard' || _card.suit === 'fool')
             {
                 return true;
             }
@@ -236,7 +404,7 @@ function GameRoom (_gameId, _hostClient) {
             // ----------------------------------------------------------------------------
             if (this.m_firstPlayedSuit === null)
             {
-                setFirstPlayedSuit(_card.suit);
+                this.setFirstPlayedSuit(_card.suit);
                 return true;
             }
 
@@ -259,7 +427,7 @@ function GameRoom (_gameId, _hostClient) {
         }
 
         return false;
-    } 
+    };
     
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn prepareForStart()
@@ -296,8 +464,6 @@ function GameRoom (_gameId, _hostClient) {
         // -----------------------------------------------------------------------------
         this.m_data.players[this.m_indexOfDealer].emit(global.events.out.PLAYER_IS_DEALER);
     };
-
-
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn isLastRound()
@@ -363,10 +529,10 @@ function GameRoom (_gameId, _hostClient) {
         // -----------------------------------------------------------------------------
         // The first played suit only gets set if the card is not a wizard or fool
         // -----------------------------------------------------------------------------
-        if(suit !== 'wizard' && suit !== 'fool') {
-            m_firstPlayedSuit = suit;
+        if(_suit !== 'wizard' && _suit !== 'fool') {
+            this.m_firstPlayedSuit = _suit;
         }
-    }
+    };
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn createCardDeck()

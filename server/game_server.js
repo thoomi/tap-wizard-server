@@ -43,7 +43,8 @@ global.events = {
             PLAYER_BEGIN_TURN:     'player_begin_turn',
             PLAYER_GUESSED_TRICKS: 'player_guessed_tricks',
             ALL_TRICKS_GUESSED:    'all_tricks_guessed',
-            CARD_NOT_ALLOWED:      'card_not_allowed'
+            CARD_NOT_ALLOWED:      'card_not_allowed',
+            PLAYER_HAS_WON_TRICK:  'player_has_won_trick',
         }
 };
 

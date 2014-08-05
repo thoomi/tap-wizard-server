@@ -104,6 +104,7 @@ function Player (_params) {
     /// \param _card The card to add
     ////////////////////////////////////////////////////////////////////////////////
     this.addCard = function(_card) {
+        _card.setPlayerId(this.m_id);
         this.m_setOfCards.push(_card);
     };
 
@@ -128,6 +129,13 @@ function Player (_params) {
         }
     };
 
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn hasCardWithSuit()
+    ///
+    /// \brief Looks if the player has a card with a specific suit in his hand deck
+    ///
+    /// \param _suit the card suit to look for
+    ////////////////////////////////////////////////////////////////////////////////
     this.hasCardWithSuit = function(_suit) {
         for (var indexOfCard = 0; indexOfCard < this.m_setOfCards.length; indexOfCard++) 
         {

@@ -95,12 +95,14 @@ function CardDeck () {
     ///
     /// Reverting means hereby to move all distributed cards back to the available 
     /// cards array, as if you collect all cards in a real game and put it togehter
-    /// on one stack.
+    /// on one stack. As an addition it resets the players id on the cards.
     ////////////////////////////////////////////////////////////////////////////////
     this.reset = function () {
     	for (var indexOfCard = this.m_distributedCards.length - 1; indexOfCard >= 0; indexOfCard--) 
         {
     		var card = this.m_distributedCards.pop();
+            card.setPlayerId(0);
+            
     		this.m_availableCards.push(card);
     	}
     };
