@@ -1,8 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Dependencies
 ////////////////////////////////////////////////////////////////////////////////
-var DATA = DATA || {};
-DATA.GameRoom = require('./data_gameroom.js');
+var GameRoom = require('./gameroom.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +36,7 @@ function GameRoomManager () {
         // -----------------------------------------------------------------------------
         // Instantiate a new game room and save it to the array with its id as key
         // -----------------------------------------------------------------------------
-        this.m_gameRooms[gameId] = new DATA.GameRoom(gameId);
+        this.m_gameRooms[gameId] = new GameRoom(gameId);
 
         // -----------------------------------------------------------------------------
         // Finally return the game so that other modules can use its id as reference

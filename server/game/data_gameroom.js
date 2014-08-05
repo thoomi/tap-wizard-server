@@ -1,12 +1,4 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// Dependencies
-////////////////////////////////////////////////////////////////////////////////
-var DATA           = DATA || {};
-DATA.PlayerManager = require('./data_player_manager.js');
-DATA.CardDeck = require('./data_carddeck.js');
-
-
-////////////////////////////////////////////////////////////////////////////////
 /// Module exports
 /// Declares the name of the object which will be available through the 
 /// require() function
@@ -23,7 +15,7 @@ GameRoom.States = {
     READY_FOR_NEW_ROUND   : 'ready_for_new_round',
     READY_TO_START        : 'ready_to_start',
     READY_TO_GUESS_TRICKS : 'redy_to_guess_tricks',
-    READY_TO_THROW_CARDS  : 'ready_to_THROW_CARDS',
+    READY_TO_THROW_CARDS  : 'ready_to_throw_cards',
     GAME_OVER             : 'game_over'
 };
 
@@ -37,17 +29,16 @@ function GameRoom (_gameId) {
     // -----------------------------------------------------------------------------
     // Member attributes.
     // -----------------------------------------------------------------------------
-    this.m_id            = _gameId;
-    this.cardDeck      = new DATA.CardDeck();
-	this.m_cardsOnTable  = [];
-    this.m_gameRoomLogic = null;
-    this.m_currentState  = GameRoom.States.UNKNOWN;
+    this.id            = _gameId;
+    this.cardDeck      = null;
+	this.cardsOnTable  = [];
+    this.currentState  = GameRoom.States.UNKNOWN;
 
     // -----------------------------------------------------------------------------
-    // m_players => The object which manages the players for the game room.
+    // players => The object which manages the players for the game room.
     // It provides the functionality to add, remove and find players.
     // -----------------------------------------------------------------------------
-	this.m_players = [];
+	this.players = [];
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -56,34 +47,25 @@ function GameRoom (_gameId) {
     /// \brief Getter for the game rooms id
     ////////////////////////////////////////////////////////////////////////////////
     this.getId = function() {
-        return this.m_id;
-    };
-
-    ////////////////////////////////////////////////////////////////////////////////
-    /// \fn setPlayerId()
-    ///
-    /// \brief Set the players id in the game
-    ////////////////////////////////////////////////////////////////////////////////
-    this.setGameRoomLogic = function(_gameRoomLogic) {
-        this.m_gameRoomLogic = _gameRoomLogic;
+        return this.id;
     };
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn setState()
     ///
-    /// \brief Set the players id in the game
+    /// \brief Set game room state
     ////////////////////////////////////////////////////////////////////////////////
     this.setState = function(_state) {
-        this.m_currentState = _state;
+        this.currentState = _state;
     };
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn getState()
     ///
-    /// \brief Getter for the players id
+    /// \brief Getter for the game room state
     ////////////////////////////////////////////////////////////////////////////////
     this.getState = function() {
-        return this.m_currentState;
+        return this.currentState;
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +76,7 @@ function GameRoom (_gameId) {
     /// \param _player The player instance to add
     ////////////////////////////////////////////////////////////////////////////////
     this.addPlayer = function (_player) {
-        this.m_players.push(_player);
+        this.players.push(_player);
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +85,7 @@ function GameRoom (_gameId) {
     /// \brief Returns the current number of players
     ////////////////////////////////////////////////////////////////////////////////
     this.getNumberOfPlayers = function () {
-        return this.m_players.length;
+        return this.players.length;
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -114,11 +96,11 @@ function GameRoom (_gameId) {
     /// \param _id The id of the player which should be removed
     ////////////////////////////////////////////////////////////////////////////////
     this.removePlayerById = function (_id) {
-        for (var indexOfPlayer = 0; indexOfPlayer < this.m_players.length; indexOfPlayer++) 
+        for (var indexOfPlayer = 0; indexOfPlayer < this.players.length; indexOfPlayer++) 
         {
-            if(this.m_players[indexOfPlayer].getId() === _id) 
+            if(this.players[indexOfPlayer].getId() === _id) 
             {
-                this.m_players.splice(indexOfPlayer, 1);
+                this.players.splice(indexOfPlayer, 1);
             }
         }
     };
@@ -134,9 +116,9 @@ function GameRoom (_gameId) {
     this.getIndexOfPlayerById = function (_id) {
         var resultPlayerIndex = -1;
 
-        for (var indexOfPlayer = 0; indexOfPlayer < this.m_players.length; indexOfPlayer++) 
+        for (var indexOfPlayer = 0; indexOfPlayer < this.players.length; indexOfPlayer++) 
         {
-            if(this.m_players[indexOfPlayer].getId() === _id) 
+            if(this.players[indexOfPlayer].getId() === _id) 
             {
                 resultPlayerIndex = indexOfPlayer;
                 break;
@@ -160,13 +142,9 @@ function GameRoom (_gameId) {
 
         if (indexOfPlayer !== -1)
         {
-            player = this.m_players[indexOfPlayer];
+            player = this.players[indexOfPlayer];
         }
 
         return player;
-    };
-
-    this.forEachPlayer = function (_callback) {
-        this.m_players.forEach(_callback);
     };
 }

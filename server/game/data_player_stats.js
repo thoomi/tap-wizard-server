@@ -3,46 +3,33 @@
 /// Declares the name of the object which will be available through the 
 /// require() function
 ////////////////////////////////////////////////////////////////////////////////
-module.exports = exports = Player;
+module.exports = exports = PlayerStats;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \fn Player(params)
+/// \fn RoundData()
 ///
-/// \brief The logic representation of a player
+/// \brief The stats data for one round
 ////////////////////////////////////////////////////////////////////////////////
-function Player () {
-    // -----------------------------------------------------------------------------
+function RoundData() {
+    this.numberOfGuessedTricks = -1;
+    this.numberOfWonTricks     = -1;
+    this.score                 = -1;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// \fn PlayerStats()
+///
+/// \brief The stats component of a player, it tracks the points per round
+////////////////////////////////////////////////////////////////////////////////
+function PlayerStats () {
+	// -----------------------------------------------------------------------------
     // Member attributes.
     // -----------------------------------------------------------------------------
-    this.m_playerData = null;
-
-    this.m_totalScore       = 0;
+	this.m_totalScore       = 0;
     this.m_roundData        = [];
     this.currentRoundNumber = 0;
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    /// \fn setPlayerData()
-    ///
-    /// \brief Sets the data representation of the player
-    ////////////////////////////////////////////////////////////////////////////////
-    this.setPlayerData = function(_gameRoomData) {
-        this.m_playerData = _gameRoomData;
-    };
-
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    /// \fn RoundData()
-    ///
-    /// \brief Player logic internel representatino of the score data per round
-    ////////////////////////////////////////////////////////////////////////////////
-    function RoundData() {
-        this.numberOfGuessedTricks = 0;
-        this.numberOfWonTricks     = 0;
-        this.score                 = 0;
-    }
 
     this.initializeNewRound = function (_roundNumber) {
         this.currentRoundNumber        = _roundNumber;
@@ -53,8 +40,10 @@ function Player () {
         this.m_roundData[this.currentRoundNumber].numberOfGuessedTricks = _numberOfGuessedTricks;
     };
 
-
     this.incrementWonTricks = function () {
         this.m_roundData[this.currentRoundNumber].numberOfWonTricks++;
+    };
+    this.hasGuessedTricks = function() {
+        return this.m_roundData[this.currentRoundNumber].numberOfGuessedTricks !== -1 ? true : false;
     };
 }

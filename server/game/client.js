@@ -6,65 +6,54 @@
 module.exports = exports = Client;
 
 
-var NetworkState = {
-	ONLINE  : 'online',
-	OFFLINE : 'offline'
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \fn Client()
 ///
 /// \brief The networking component of the client
 ////////////////////////////////////////////////////////////////////////////////
-function Client (_socketId) {
+function Client (_socket) {
     // -----------------------------------------------------------------------------
     // The parameters are essential, thus test if they are set, otherwise throw error.
     // -----------------------------------------------------------------------------
-    if (typeof(_socketId) === 'undefined') { throw new Error('_socketId parameter in Net::Client constructor is undefined.'); }
+    if (typeof(_socket) === 'undefined') { throw new Error('_socket parameter in Net::Client constructor is undefined.'); }
 
 	// -----------------------------------------------------------------------------
     // Member attributes.
     // -----------------------------------------------------------------------------
-    this.m_playerId = 0;
-    this.m_socketId = _socketId;
-	this.m_state    = NetworkState.OFFLINE;
-
+    this.m_socket = _socket;
 
     ////////////////////////////////////////////////////////////////////////////////
-    /// \fn setPlayerId()
+    /// \fn setSocket()
     ///
-    /// \brief Set the players id in the game
+    /// \brief Set the socket
     ////////////////////////////////////////////////////////////////////////////////
-    this.setPlayerId = function(_id) {
-        this.m_playerId = _id;
+    this.setSocket = function(_socket) {
+        this.m_socket = _socket;
     };
 
+
     ////////////////////////////////////////////////////////////////////////////////
-    /// \fn getPlayerId()
+    /// \fn getSocket()
     ///
-    /// \brief Getter for the players id
+    /// \brief Getter for the socket object
     ////////////////////////////////////////////////////////////////////////////////
-    this.getPlayerId = function() {
+    this.getSocket = function() {
         return this.m_id;
     };
 
-
     ////////////////////////////////////////////////////////////////////////////////
-    /// \fn setPlayerId()
+    /// \fn emit()
     ///
-    /// \brief Set the players id in the game
+    /// \brief Sends data to the remote client over the socket
     ////////////////////////////////////////////////////////////////////////////////
-    this.setSocketId = function(_id) {
-        this.m_socketId = _id;
-    };
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    /// \fn getPlayerId()
-    ///
-    /// \brief Getter for the players id
-    ////////////////////////////////////////////////////////////////////////////////
-    this.getSocketId = function() {
-        return this.m_id;
+    this.emit = function (_message, _data) {
+        if (this.m_socket) 
+        {
+            this.m_socket.emit(_message, _data);
+        }
+        else 
+        {
+            console.log('Clients socket is not set.');
+        }
     };
 }
