@@ -21,13 +21,11 @@ function GameRoomManager () {
 
 
     ////////////////////////////////////////////////////////////////////////////////
-    /// \fn setCardDeck(_deck)
+    /// \fn createNewGameRoom(_deck)
     ///
-    /// \brief Sets the card deck
-    ///
-    /// \param _deck The 
+    /// \brief Creates a new game room
     ////////////////////////////////////////////////////////////////////////////////
-    this.createNewGameRoom = function () {
+    this.createNewGameRoom = function (_gameTableClient) {
         // -----------------------------------------------------------------------------
         // TODO: Develop a proper way to generate a unique game id
         // -----------------------------------------------------------------------------
@@ -36,7 +34,7 @@ function GameRoomManager () {
         // -----------------------------------------------------------------------------
         // Instantiate a new game room and save it to the array with its id as key
         // -----------------------------------------------------------------------------
-        this.m_gameRooms[gameId] = new GameRoom(gameId);
+        this.m_gameRooms[gameId] = new GameRoom(gameId, _gameTableClient);
 
         // -----------------------------------------------------------------------------
         // Finally return the game so that other modules can use its id as reference

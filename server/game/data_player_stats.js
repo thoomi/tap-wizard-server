@@ -52,6 +52,10 @@ function PlayerStats () {
         return this.m_roundData[_roundNumber].score;
     };
 
+    this.getTotalScore = function() {
+        return this.m_totalScore;
+    };
+
     this.calculateRoundScore = function(_roundNumber) {
         var guessedTricks   = this.m_roundData[_roundNumber].numberOfGuessedTricks;
         var wonTricks       = this.m_roundData[_roundNumber].wonTricks;

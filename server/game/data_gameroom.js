@@ -10,7 +10,6 @@ module.exports = exports = GameRoom;
 /// Game room states as static constructor members
 ////////////////////////////////////////////////////////////////////////////////
 GameRoom.States = {
-    UNKNOWN               : 'unknown',
     WAITING_FOR_PLAYERS   : 'waiting_for_players',
     READY_FOR_NEW_ROUND   : 'ready_for_new_round',
     READY_TO_START        : 'ready_to_start',
@@ -32,7 +31,7 @@ function GameRoom (_gameId) {
     this.id            = _gameId;
     this.cardDeck      = null;
 	this.cardsOnTable  = [];
-    this.currentState  = GameRoom.States.UNKNOWN;
+    this.currentState  = GameRoom.States.WAITING_FOR_PLAYERS;
 
     // -----------------------------------------------------------------------------
     // players => The object which manages the players for the game room.

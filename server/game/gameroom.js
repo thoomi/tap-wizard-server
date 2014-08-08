@@ -13,18 +13,18 @@ var CardDeck = require('./carddeck.js');
 module.exports = exports = GameRoom;
 
 
-function GameRoom (_gameId, _hostClient) {
+function GameRoom (_gameId, _gameTableClient) {
     // -----------------------------------------------------------------------------
     // The parameters are essential, thus test if they are set, otherwise throw error.
     // -----------------------------------------------------------------------------
     if (typeof(_gameId) === 'undefined') { throw new Error('_gameId parameter in GameRoom constructor is undefined.'); }
-    if (typeof(_hostClient) === 'undefined') { throw new Error('_hostClient parameter in GameRoom constructor is undefined.'); }
+    if (typeof(_gameTableClient) === 'undefined') { throw new Error('_gameTableClient parameter in GameRoom constructor is undefined.'); }
 
     // -----------------------------------------------------------------------------
     // Member attributes.
     // -----------------------------------------------------------------------------
     this.m_data          = new GameRoomData(_gameId);
-    this.m_hostClient    = _hostClient;
+    this.gameTableClient = _gameTableClient;
 
     this.m_maxRounds       = 0;
     this.m_currentRound    = 0;
@@ -43,18 +43,31 @@ function GameRoom (_gameId, _hostClient) {
     /// \brief Add player to game room
     ////////////////////////////////////////////////////////////////////////////////
     this.playerJoin = function(_player) {
-
         this.m_data.addPlayer(_player);
+
+        this.emitToAll(global.events.out.PLAYER_JOINED_GAME);
     };
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn playerLeaveGame()
     ///
-    /// \brief Remove player from game room
+    /// \brief Remove player from game room (the only time when a player can realy 
+    /// leave the game room is during the "waiting" or the "game over" state)
+    ///
+    /// \return true or false depending on the game state (if the player is not 
+    /// allowed to leave "false")
     ////////////////////////////////////////////////////////////////////////////////
     this.playerLeave = function(_playerId) {
-
-        this.m_data.removePlayerById(_playerId);
+        if (this.m_data.getState() === GameRoom.States.WAITING_FOR_PLAYERS ||
+            this.m_data.getState() === GameRoom.States.GAME_OVER)
+        {
+          this.m_data.removePlayerById(_playerId);
+          return true;
+        }
+        else 
+        {
+            return false;
+        }
     };
 
 
@@ -64,6 +77,14 @@ function GameRoom (_gameId, _hostClient) {
     /// \brief Starts a new round by dealing cards etc..
     ////////////////////////////////////////////////////////////////////////////////
     this.startRound = function() {
+        // -----------------------------------------------------------------------------
+        // Notify all that we are going to start a new round
+        // -----------------------------------------------------------------------------
+        var data = {
+            roundNumber: this.m_currentRound
+        };
+        this.emitToAll(global.events.out.NEW_ROUND_STARTS, data);
+
         // -----------------------------------------------------------------------------
         // Reset card deck, shuffle and deal the cards
         // -----------------------------------------------------------------------------
@@ -79,7 +100,7 @@ function GameRoom (_gameId, _hostClient) {
         if (!this.isLastRound())
         {
             this.m_trumpCard = this.m_currentRound.cardDeck.getCard();
-            this.m_hostClient.emit(global.events.out.NEW_TRUMP_CARD, this.m_trumpCard);
+            this.gameTableClient.emit(global.events.out.NEW_TRUMP_CARD, this.m_trumpCard);
         }
 
         // -----------------------------------------------------------------------------
@@ -127,6 +148,9 @@ function GameRoom (_gameId, _hostClient) {
     /// \fn playerGuessedTricks()
     ///
     /// \brief Sets the guessed tricks per player
+    ///
+    /// \params _playerId
+    /// \params _numberOfGuessedTricks
     ////////////////////////////////////////////////////////////////////////////////
     this.playerGuessedTricks = function(_playerId, _numberOfGuessedTricks) {
         // ----------------------------------------------------------------------------
@@ -136,18 +160,18 @@ function GameRoom (_gameId, _hostClient) {
         player.m_stats.setGuessedTricks(_numberOfGuessedTricks);
 
         // ----------------------------------------------------------------------------
-        // Notify host that a player guessed the tricks
+        // Notify game table that a player guessed the tricks
         // ----------------------------------------------------------------------------
         var data = { 
             playerId: player.getId(),
             guessedTricks: _numberOfGuessedTricks,
             roundNumber: this.m_currentRound
         };
-        this.m_hostClient.emit(global.events.out.PLAYER_GUESSED_TRICKS, data);
+        this.gameTableClient.emit(global.events.out.PLAYER_GUESSED_TRICKS, data);
 
         // ----------------------------------------------------------------------------
         // Check if everyone guessed tricks in the current round, and if so notify the
-        // game members (players and host) and change the state to ready for cards
+        // game members (players and game table) and change the state to ready for cards
         // ----------------------------------------------------------------------------
         if (this.hasEveryPlayerGuessedTricks()) 
         {
@@ -160,6 +184,9 @@ function GameRoom (_gameId, _hostClient) {
     /// \fn playerThrowCard()
     ///
     /// \brief Implements the logic in order to throw a card for the player
+    ///
+    /// \params _playerId
+    /// \params _card
     ////////////////////////////////////////////////////////////////////////////////
     this.playerThrowCard = function(_playerId, _card) {
         // ----------------------------------------------------------------------------
@@ -170,7 +197,7 @@ function GameRoom (_gameId, _hostClient) {
         if (!this.isCardAllowed())
         {
             // ----------------------------------------------------------------------------
-            // Notify the player that he is not allowed to throw a card
+            // Notify the player that he is not allowed to throw the card
             // ----------------------------------------------------------------------------
             var data = { card: _card };
             player.emit(global.events.out.CARD_NOT_ALLOWED, data);
@@ -186,7 +213,7 @@ function GameRoom (_gameId, _hostClient) {
 
             this.m_data.cardsOnTable.push(_card);
 
-            this.m_hostClient.emit(global.events.out.PLAYER_HAS_THROWN_CARD);
+            this.gameTableClient.emit(global.events.out.PLAYER_HAS_THROWN_CARD);
 
             // ----------------------------------------------------------------------------
             // playerThrowCard() is kind of the "main" loop cycle, therefore check the
@@ -212,16 +239,16 @@ function GameRoom (_gameId, _hostClient) {
             // ----------------------------------------------------------------------------
             // Determine the winner of the current trick turn
             // ----------------------------------------------------------------------------
-            var winnerPlayerId = this.determineTrickWinner();
-            var winnerPlayer   = this.m_data.getPlayerId(winnerPlayerId);
+            var trickWinnerPlayerId = this.determineTrickWinner();
+            var trickWinnerPlayer   = this.m_data.getPlayerId(trickWinnerPlayerId);
 
-            winnerPlayer.m_stats.incrementWonTricks();
+            trickWinnerPlayer.m_stats.incrementWonTricks();
             this.m_playedTricks++;
 
-            var data = { playerName: winnerPlayer.getName() };
+            var data = { playerName: trickWinnerPlayer.getName() };
             this.emitToAll(global.events.out.PLAYER_HAS_WON_TRICK, data);
 
-            this.m_lastTrickWinner = winnerPlayer;
+            this.m_lastTrickWinner = trickWinnerPlayer;
 
             this.resetForNextTrickTurn();
         }
@@ -255,8 +282,50 @@ function GameRoom (_gameId, _hostClient) {
         // ----------------------------------------------------------------------------
         if (this.m_currentRound === this.m_maxRounds)
         {
-            //this.gameOver();
+            var winnerPlayer = this.calculateGameWinner();
+
+            var winnerData = {
+                winnerName : winnerPlayer.getName(),
+                winnerId   : winnerPlayer.getId()
+            };
+
+            this.emitToAll(global.events.out.GAME_IS_OVER, winnerData);
+            this.m_data.setState(GameRoom.States.GAME_OVER);
         }
+        else 
+        {
+            this.m_data.setState(GameRoom.States.READY_FOR_NEW_ROUND);
+        }
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn calculateGameWinner()
+    ///
+    /// \brief Calculates the winner of the game by comparing the players total scores
+    ///
+    /// \return The player who is the winner of the match
+    //////////////////////////////////////////////////////////////////////////////// 
+    this.calculateGameWinner = function() {
+        var winnerPlayer = this.m_data.players[0];
+
+        for (var indexOfPlayer = 1; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++)
+        {
+            var player = this.m_data.players[indexOfPlayer];
+
+            var winnerScore = winnerPlayer.m_stats.getTotalScore();
+            var playerScore = player.m_stats.getTotalScore();
+
+            // ----------------------------------------------------------------------------
+            // NOTE: This does not work perfectly if two players have the same score and
+            // both of them are winners.
+            // ----------------------------------------------------------------------------
+            if (winnerScore < playerScore)
+            {
+                winnerPlayer = player;
+            }
+        }
+
+        return winnerPlayer;
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -516,6 +585,15 @@ function GameRoom (_gameId, _hostClient) {
     ////////////////////////////////////////////////////////////////////////////////
     this.prepareForStart = function() {
         // -----------------------------------------------------------------------------
+        // Check if at least 3 players are in the room
+        // -----------------------------------------------------------------------------
+        if (this.m_data.getNumberOfPlayers() < 3)
+        {
+            this.gameTableClient.emit(global.events.out.NOT_ENOUGH_PLAYERS);
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
         // Create the card deck
         // -----------------------------------------------------------------------------
         this.createCardDeck();
@@ -534,7 +612,7 @@ function GameRoom (_gameId, _hostClient) {
         this.m_data.setState(GameRoomData.States.READY_FOR_NEW_ROUND);
 
         // -----------------------------------------------------------------------------
-        // Notify the players and the host that the game is ready for the first round.
+        // Notify the players and the game table that the game is ready for the first round.
         // -----------------------------------------------------------------------------
         var data = { maxRounds: this.m_maxRounds };
         this.emitToAll(global.events.out.GAME_STARTS, data);
@@ -574,14 +652,14 @@ function GameRoom (_gameId, _hostClient) {
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn emitToAll()
     ///
-    /// \return Sends a message to all players and the host
+    /// \return Sends a message to all players and the game table
     ////////////////////////////////////////////////////////////////////////////////
     this.emitToAll = function(_message, _data) {
         for (var indexOfPlayer = 0; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++) 
         {
             this.m_data.players[indexOfPlayer].emit(_message, _data);
         }
-        this.m_data.m_hostClient.emit(_message, _data);
+        this.m_gameTableClient.emit(_message, _data);
     };
 
     ////////////////////////////////////////////////////////////////////////////////

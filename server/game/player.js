@@ -148,11 +148,12 @@ function Player (_params) {
     };
 
     ////////////////////////////////////////////////////////////////////////////////
-    /// \fn emit(_data)
+    /// \fn emit(_message, _data)
     ///
     /// \brief Emits _data to the client of the player
     ///
-    /// \param _data the object to be transfered to the client
+    /// \params _message 
+    /// \params _data the object to be transfered to the client
     ////////////////////////////////////////////////////////////////////////////////
     this.emit = function(_message, _data) {
         if (this.m_client)
