@@ -43,7 +43,42 @@ function PlayerStats () {
     this.incrementWonTricks = function () {
         this.m_roundData[this.currentRoundNumber].numberOfWonTricks++;
     };
+
     this.hasGuessedTricks = function() {
         return this.m_roundData[this.currentRoundNumber].numberOfGuessedTricks !== -1 ? true : false;
+    };
+
+    this.getRoundScore = function(_roundNumber) {
+        return this.m_roundData[_roundNumber].score;
+    };
+
+    this.calculateRoundScore = function(_roundNumber) {
+        var guessedTricks   = this.m_roundData[_roundNumber].numberOfGuessedTricks;
+        var wonTricks       = this.m_roundData[_roundNumber].wonTricks;
+        var trickDifference = Math.abs(guessedTricks - wonTricks);
+        var roundScore      = 0;
+
+        if (trickDifference === 0)
+        {
+            // -----------------------------------------------------------------------------
+            // Player won exactly the number of tricks he has guessed.
+            // The score will be 20 points for the "correct guessing" and an additional
+            // number of points for each won trick
+            // -----------------------------------------------------------------------------
+            roundScore = 20 + 10 * wonTricks;
+        }
+        else 
+        {
+            // -----------------------------------------------------------------------------
+            // Player did not win the exact number of tricks he has guessed.
+            // The score will be -10 multiplied with the difference between the won tricks
+            // to the guessed tricks
+            // -----------------------------------------------------------------------------
+            roundScore = -10 * trickDifference;
+        }
+
+        this.m_roundData[_roundNumber].score = roundScore;
+
+        this.m_totalScore += roundScore;
     };
 }

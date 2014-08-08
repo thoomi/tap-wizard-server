@@ -143,15 +143,16 @@ function GameRoom (_gameId, _hostClient) {
             guessedTricks: _numberOfGuessedTricks,
             roundNumber: this.m_currentRound
         };
-        this.m_hostClient.emit(global.events.PLAYER_GUESSED_TRICKS, data);
+        this.m_hostClient.emit(global.events.out.PLAYER_GUESSED_TRICKS, data);
 
         // ----------------------------------------------------------------------------
         // Check if everyone guessed tricks in the current round, and if so notify the
-        // game members (players and host)
+        // game members (players and host) and change the state to ready for cards
         // ----------------------------------------------------------------------------
         if (this.hasEveryPlayerGuessedTricks()) 
         {
-            this.emitToAll(global.events.ALL_TRICKS_GUESSED);
+            this.emitToAll(global.events.out.ALL_TRICKS_GUESSED);
+            this.m_data.setState(GameRoom.States.READY_TO_THROW_CARDS);
         }
     };
 
@@ -172,7 +173,7 @@ function GameRoom (_gameId, _hostClient) {
             // Notify the player that he is not allowed to throw a card
             // ----------------------------------------------------------------------------
             var data = { card: _card };
-            player.emit(global.events.CARD_NOT_ALLOWED, data);
+            player.emit(global.events.out.CARD_NOT_ALLOWED, data);
         }
         else 
         {
@@ -185,9 +186,13 @@ function GameRoom (_gameId, _hostClient) {
 
             this.m_data.cardsOnTable.push(_card);
 
+            this.m_hostClient.emit(global.events.out.PLAYER_HAS_THROWN_CARD);
+
             // ----------------------------------------------------------------------------
-            // TODO: check game state and notify players / host about the played card
+            // playerThrowCard() is kind of the "main" loop cycle, therefore check the
+            // game state after each "cycle tick".
             // ----------------------------------------------------------------------------
+            this.checkGameState();
         }
     };
 
@@ -199,7 +204,7 @@ function GameRoom (_gameId, _hostClient) {
     //////////////////////////////////////////////////////////////////////////////// 
     this.checkGameState = function() {
         // ----------------------------------------------------------------------------
-        // Check if the current trick turn is over. A trick turn is over if every player
+        // 1. Check if the current trick turn is over. A trick turn is over if every player
         // played exactly one card.
         // ----------------------------------------------------------------------------
         if (this.m_data.getNumberOfCardsOnTable() === this.m_data.getNumberOfPlayers())
@@ -212,21 +217,96 @@ function GameRoom (_gameId, _hostClient) {
 
             winnerPlayer.m_stats.incrementWonTricks();
             this.m_playedTricks++;
-            this.resetForNextTrickTurn();
 
             var data = { playerName: winnerPlayer.getName() };
             this.emitToAll(global.events.out.PLAYER_HAS_WON_TRICK, data);
 
+            this.m_lastTrickWinner = winnerPlayer;
+
+            this.resetForNextTrickTurn();
+        }
+
+
+        // ----------------------------------------------------------------------------
+        // 2. Check if the last trick in a round has been played
+        // ----------------------------------------------------------------------------
+        if (this.m_playedTricks === this.m_currentRound)
+        {
+            var scorePerPlayer = this.calculateRoundScorePerPlayer();
+
+            this.emitToAll(global.events.out.ROUND_IS_OVER, scorePerPlayer);
+
+            this.m_resetForNextRound();
+
             // ----------------------------------------------------------------------------
-            // TODO: check if round or game is over
+            // Determine the next dealer by cycling through the players array
             // ----------------------------------------------------------------------------
+            this.m_indexOfDealer++;
+            if (this.m_indexOfDealer === this.m_data.getNumberOfPlayers())
+            {
+                this.m_indexOfDealer = 0;
+            }
+
+            this.m_currentRound++;
+        }
+
+        // ----------------------------------------------------------------------------
+        // 3. Check if all rounds in a game are played and the game so to speak is over
+        // ----------------------------------------------------------------------------
+        if (this.m_currentRound === this.m_maxRounds)
+        {
+            //this.gameOver();
         }
     };
 
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn calculateRoundScorePerPlayer()
+    ///
+    /// \brief Calculates the round score for each player
+    ///
+    /// \return An score object with the score for each player accessible by the id
+    /// of the player
+    //////////////////////////////////////////////////////////////////////////////// 
+    this.calculateRoundScorePerPlayer = function() {
+        var scores = {};
+
+        for (var indexOfPlayer = 0; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++)
+        {
+            var player = this.m_data.players[indexOfPlayer];
+
+            player.m_stats.calculateRoundScore(this.m_currentRound);
+
+            // ----------------------------------------------------------------------------
+            // Save the individual player score into the scores object with the player id
+            // as the key
+            // ----------------------------------------------------------------------------
+            scores[player.getId()] = player.m_stats.getRoundScore(this.m_currentRound);
+        }
+
+        return scores;
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn resetForNextRound()
+    ///
+    /// \brief Resets all game logic data in order to be ready for the next round
+    //////////////////////////////////////////////////////////////////////////////// 
+    this.resetForNextRound = function() {
+        this.resetForNextTrickTurn(); // NOTE: This is not realy necassary
+
+        this.m_playedTricks    = 0;
+        this.m_trumpCard       = 0;
+        this.m_lastTrickWinner = null;
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn resetForNextTrickTurn()
+    ///
+    /// \brief Resets all game logic data in order to be ready for the next trip turn
+    //////////////////////////////////////////////////////////////////////////////// 
     this.resetForNextTrickTurn = function() {
         this.m_data.cardsOnTable = [];
         this.m_firstPlayedCard   = null;
-        this.m_trumpCard         = null;
         this.m_firstPlayedSuit   = null;
 
         for (var indexOfPlayer = 0; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++) 

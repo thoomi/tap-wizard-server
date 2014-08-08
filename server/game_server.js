@@ -36,15 +36,17 @@ global.events = {
             GUESS_TRICKS: 'guess_tricks'
         },
         out: {
-            GAME_STARTS:           'game_starts',
-            NEW_HAND_CARD:         'new_hand_card',
-            NEW_TRUMP_CARD:        'new_trump_card',
-            PLAYER_IS_DEALER:      'player_is_dealer',
-            PLAYER_BEGIN_TURN:     'player_begin_turn',
-            PLAYER_GUESSED_TRICKS: 'player_guessed_tricks',
-            ALL_TRICKS_GUESSED:    'all_tricks_guessed',
-            CARD_NOT_ALLOWED:      'card_not_allowed',
-            PLAYER_HAS_WON_TRICK:  'player_has_won_trick',
+            GAME_STARTS:            'game_starts',
+            NEW_HAND_CARD:          'new_hand_card',
+            NEW_TRUMP_CARD:         'new_trump_card',
+            PLAYER_IS_DEALER:       'player_is_dealer',
+            PLAYER_BEGIN_TURN:      'player_begin_turn',
+            PLAYER_GUESSED_TRICKS:  'player_guessed_tricks',
+            ALL_TRICKS_GUESSED:     'all_tricks_guessed',
+            CARD_NOT_ALLOWED:       'card_not_allowed',
+            PLAYER_HAS_THROWN_CARD: 'player_has_thrown_card',
+            PLAYER_HAS_WON_TRICK:   'player_has_won_trick',
+            ROUND_IS_OVER:          'round_is_over'
         }
 };
 
