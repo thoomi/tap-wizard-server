@@ -10,13 +10,13 @@ var SocketIoServer  = require('socket.io');
 ////////////////////////////////////////////////////////////////////////////////
 /// Module exports
 /// Declares the name of the object which will be available through the 
-/// require() function
+/// require() function.
 ////////////////////////////////////////////////////////////////////////////////
 module.exports = exports = GameServer;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// These events might be shared with the client implementation
+/// These events might be shared with the client implementation.
 ////////////////////////////////////////////////////////////////////////////////
 global.events = {
         in: {
@@ -52,7 +52,7 @@ global.events = {
 ////////////////////////////////////////////////////////////////////////////////
 /// \fn GameServer()
 ///
-/// \brief The representation of the game sever
+/// \brief The representation of the game sever.
 ////////////////////////////////////////////////////////////////////////////////
 function GameServer () {
 
@@ -67,7 +67,7 @@ function GameServer () {
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn onStartup()
     ///
-    /// \brief Sets up and initializes the server
+    /// \brief Sets up and initializes the server.
     ////////////////////////////////////////////////////////////////////////////////
     this.onStartup = function() {
         this.m_gameRoomManager = new GamRoomManager();
@@ -83,7 +83,7 @@ function GameServer () {
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn onShutdown()
     ///
-    /// \brief Gracefully shutdown of the server
+    /// \brief Gracefully shutdown of the server.
     ////////////////////////////////////////////////////////////////////////////////
     this.onShutdown = function() {
         this.m_io.close();
@@ -93,7 +93,7 @@ function GameServer () {
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn initializeEventListeners()
     ///
-    /// \brief Sets up all listeners to possible network socket events
+    /// \brief Sets up all listeners to possible network socket events.
     ////////////////////////////////////////////////////////////////////////////////
     this.initializeEventListeners = function() {
         this.m_io.on(global.events.in.CONNECT, function(_socket) {
@@ -103,40 +103,40 @@ function GameServer () {
             ////////////////////////////////////////////////////////////////////////////////
             /// \fn event.in.DISCONNECT
             ///
-            /// \brief This event gets fired if the client looses connection
+            /// \brief This event gets fired if the client looses connection.
             ////////////////////////////////////////////////////////////////////////////////
             _socket.on(global.events.in.DISCONNECT, function() {
                 console.info('Disconnect event for Socket: %s', this.id);
                 var socket = this;
 
                 // -----------------------------------------------------------------------------
-                // Look if a client object is associated with the socket
+                // Look if a client object is associated with the socket.
                 // -----------------------------------------------------------------------------
                 var client = this.m_clientManager.getClientBySocketId(socket.id);
 
                 if (client)
                 {
                     // -----------------------------------------------------------------------------
-                    // Check if client is a player
+                    // Check if client is a player.
                     // -----------------------------------------------------------------------------
                     if (client.playerId)
                     {
                         // -----------------------------------------------------------------------------
-                        // Get the game room associated with the client
+                        // Get the game room associated with the client.
                         // -----------------------------------------------------------------------------
                         var gameRoom = this.m_gameRoomManager.getRoomById(client.gameRoomId);
 
                         if (gameRoom.playerLeave(client.playerId))
                         {
                             // -----------------------------------------------------------------------------
-                            // Player left room thus remove the client
+                            // Player left room thus remove the client.
                             // -----------------------------------------------------------------------------
                             this.m_clientManager.removeClientBySocketId(socket.id);
                         }
                         else 
                         {
                             // -----------------------------------------------------------------------------
-                            // Player is not allowed to leave though only set his client socket to null
+                            // Player is not allowed to leave though only set his client socket to null.
                             // -----------------------------------------------------------------------------
                             client.setSocket(null);
                         }
@@ -144,10 +144,12 @@ function GameServer () {
                     else 
                     {
                         // -----------------------------------------------------------------------------
-                        // Client is a game table. Set the game table socket to null
+                        // Client is a game table. Set the game table socket to null.
                         //
                         // TODO: Develop a way to determine if the host is gone forever and if it is 
-                        // necassary to end the game and / or delete the game room.
+                        // necassary to end the game and / or delete the game room. For example:
+                        //    - setTimeout() for 30 minutes or something and check if the host socket
+                        //      still isn't set.
                         // -----------------------------------------------------------------------------
                         client.setSocket(null);
                     }
@@ -212,7 +214,7 @@ function GameServer () {
                 var newGameRoom = this.m_gameRoomManager.createNewGameRoom(gameTableClient);
 
                 // -----------------------------------------------------------------------------
-                // Save the game room id also on the client
+                // Save the game room id also on the client.
                 // -----------------------------------------------------------------------------
                 gameTableClient.gameRoomId = newGameRoom.m_data.getId();
 
