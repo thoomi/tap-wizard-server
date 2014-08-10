@@ -36,7 +36,6 @@ function GameRoom (_gameId, _gameTableClient) {
     this.m_playedTricks    = 0;
 
 
-
     ////////////////////////////////////////////////////////////////////////////////
     /// \fn playerJoinGame()
     ///
@@ -45,7 +44,12 @@ function GameRoom (_gameId, _gameTableClient) {
     this.playerJoin = function(_player) {
         this.m_data.addPlayer(_player);
 
-        this.emitToAll(global.events.out.PLAYER_JOINED_GAME);
+        var data = {
+            playerName : _player.getName(),
+            playerId   : _player.getId()
+        };
+
+        this.emitToAll(global.events.out.PLAYER_JOINED_GAME, data);
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -58,10 +62,16 @@ function GameRoom (_gameId, _gameTableClient) {
     /// allowed to leave "false")
     ////////////////////////////////////////////////////////////////////////////////
     this.playerLeave = function(_playerId) {
-        if (this.m_data.getState() === GameRoom.States.WAITING_FOR_PLAYERS ||
-            this.m_data.getState() === GameRoom.States.GAME_OVER)
+        if (this.m_data.getState() === GameRoomData.States.WAITING_FOR_PLAYERS ||
+            this.m_data.getState() === GameRoomData.States.GAME_OVER)
         {
           this.m_data.removePlayerById(_playerId);
+
+          var data = {
+            playerId: _playerId
+          };
+          this.emitToAll(global.events.out.PLAYER_LEFT_GAME, data);
+
           return true;
         }
         else 
@@ -100,7 +110,11 @@ function GameRoom (_gameId, _gameTableClient) {
         if (!this.isLastRound())
         {
             this.m_trumpCard = this.m_currentRound.cardDeck.getCard();
-            this.gameTableClient.emit(global.events.out.NEW_TRUMP_CARD, this.m_trumpCard);
+
+            var networkData = {
+                card : this.m_trumpCard
+            };
+            this.gameTableClient.emit(global.events.out.NEW_TRUMP_CARD, networkData);
         }
 
         // -----------------------------------------------------------------------------
@@ -139,7 +153,11 @@ function GameRoom (_gameId, _gameTableClient) {
                 var card = this.m_data.cardDeck.getCard();
 
                 this.m_data.players[indexOfPlayer].addCard(card);
-                this.m_data.players[indexOfPlayer].emit(global.events.out.NEW_HAND_CARD, card);
+
+                var data = {
+                    card: card
+                };
+                this.m_data.players[indexOfPlayer].emit(global.events.out.NEW_HAND_CARD, data);
             }
         }
     };
@@ -176,7 +194,7 @@ function GameRoom (_gameId, _gameTableClient) {
         if (this.hasEveryPlayerGuessedTricks()) 
         {
             this.emitToAll(global.events.out.ALL_TRICKS_GUESSED);
-            this.m_data.setState(GameRoom.States.READY_TO_THROW_CARDS);
+            this.m_data.setState(GameRoomData.States.READY_TO_THROW_CARDS);
         }
     };
 
@@ -194,7 +212,7 @@ function GameRoom (_gameId, _gameTableClient) {
         // ----------------------------------------------------------------------------
         var player = this.m_data.getPlayerById(_playerId);
 
-        if (!this.isCardAllowed())
+        if (!this.isCardAllowed(player, _card))
         {
             // ----------------------------------------------------------------------------
             // Notify the player that he is not allowed to throw the card
@@ -213,7 +231,11 @@ function GameRoom (_gameId, _gameTableClient) {
 
             this.m_data.cardsOnTable.push(_card);
 
-            this.gameTableClient.emit(global.events.out.PLAYER_HAS_THROWN_CARD);
+            var networkData = {
+                card: _card
+            };
+
+            this.gameTableClient.emit(global.events.out.PLAYER_HAS_THROWN_CARD, networkData);
 
             // ----------------------------------------------------------------------------
             // playerThrowCard() is kind of the "main" loop cycle, therefore check the
@@ -245,7 +267,10 @@ function GameRoom (_gameId, _gameTableClient) {
             trickWinnerPlayer.m_stats.incrementWonTricks();
             this.m_playedTricks++;
 
-            var data = { playerName: trickWinnerPlayer.getName() };
+            var data = { 
+                playerName: trickWinnerPlayer.getName(),
+                playerId  : trickWinnerPlayerId
+            };
             this.emitToAll(global.events.out.PLAYER_HAS_WON_TRICK, data);
 
             this.m_lastTrickWinner = trickWinnerPlayer;
@@ -261,7 +286,11 @@ function GameRoom (_gameId, _gameTableClient) {
         {
             var scorePerPlayer = this.calculateRoundScorePerPlayer();
 
-            this.emitToAll(global.events.out.ROUND_IS_OVER, scorePerPlayer);
+            var networkData = {
+                scores: scorePerPlayer
+            };
+
+            this.emitToAll(global.events.out.ROUND_IS_OVER, networkData);
 
             this.m_resetForNextRound();
 
@@ -290,11 +319,11 @@ function GameRoom (_gameId, _gameTableClient) {
             };
 
             this.emitToAll(global.events.out.GAME_IS_OVER, winnerData);
-            this.m_data.setState(GameRoom.States.GAME_OVER);
+            this.m_data.setState(GameRoomData.States.GAME_OVER);
         }
         else 
         {
-            this.m_data.setState(GameRoom.States.READY_FOR_NEW_ROUND);
+            this.m_data.setState(GameRoomData.States.READY_FOR_NEW_ROUND);
         }
     };
 
@@ -412,7 +441,7 @@ function GameRoom (_gameId, _gameTableClient) {
                 // 1.1 A wizard has been played, though the player of the first wizard is the 
                 // winner of the trick turn.
                 // ----------------------------------------------------------------------------
-                return cardToCheck.getPlayerId();
+                return cardToCheck.playerId;
             }
             else if (cardToCheck.suit === 'fool') 
             {
@@ -425,7 +454,7 @@ function GameRoom (_gameId, _gameTableClient) {
 
                 if (this.m_data.getNumberOfCardsOnTable() === foolCount)
                 {
-                    return this.m_data.cardsOnTable[0].getPlayerId();
+                    return this.m_data.cardsOnTable[0].playerId;
                 }
             }
             else
@@ -491,7 +520,7 @@ function GameRoom (_gameId, _gameTableClient) {
             }
         }
 
-        return winnerCard.getPlayerId();
+        return winnerCard.playerId;
     };
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -659,7 +688,7 @@ function GameRoom (_gameId, _gameTableClient) {
         {
             this.m_data.players[indexOfPlayer].emit(_message, _data);
         }
-        this.m_gameTableClient.emit(_message, _data);
+        this.gameTableClient.emit(_message, _data);
     };
 
     ////////////////////////////////////////////////////////////////////////////////

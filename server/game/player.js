@@ -104,7 +104,7 @@ function Player (_params) {
     /// \param _card The card to add
     ////////////////////////////////////////////////////////////////////////////////
     this.addCard = function(_card) {
-        _card.setPlayerId(this.m_id);
+        _card.playerId = this.m_id;
         this.m_setOfCards.push(_card);
     };
 

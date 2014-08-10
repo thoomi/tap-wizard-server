@@ -29,29 +29,5 @@ function Card (_params){
 	// -----------------------------------------------------------------------------
     // This is a reference to the player who played this card.
     // -----------------------------------------------------------------------------
-	this.m_playerId = 0;
-
-
-	////////////////////////////////////////////////////////////////////////////////
-    /// \fn setPlayerId(_playerId)
-    ///
-    /// \brief Sets the id of the player who played the card
-    ///
-    /// \param _playerId the id of the player who played the card
-    ////////////////////////////////////////////////////////////////////////////////
-	this.setPlayerId = function (_playerId) {
-		this.m_playerId = _playerId;
-	};
-
-
-	////////////////////////////////////////////////////////////////////////////////
-    /// \fn getPlayerId()
-    ///
-    /// \brief Getter for the player id who played the card
-    ///
-    /// \return The id of the player who played this card
-    ////////////////////////////////////////////////////////////////////////////////
-	this.getPlayerId = function () {
-		return this.m_playerId;
-	};
+	this.playerId = 0;
 }

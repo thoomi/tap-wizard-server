@@ -29,17 +29,18 @@ function GameRoomManager () {
         // -----------------------------------------------------------------------------
         // TODO: Develop a proper way to generate a unique game id
         // -----------------------------------------------------------------------------
-        var gameId = ( Math.random() * 1000 ) | 0;
+        var gameId = (( Math.random() * 1000 ) | 0).toString();
 
         // -----------------------------------------------------------------------------
-        // Instantiate a new game room and save it to the array with its id as key
+        // Instantiate a new game room and save it to the array
         // -----------------------------------------------------------------------------
-        this.m_gameRooms[gameId] = new GameRoom(gameId, _gameTableClient);
+        var index = this.m_gameRooms.length;
+        this.m_gameRooms[index] = new GameRoom(gameId, _gameTableClient);
 
         // -----------------------------------------------------------------------------
         // Finally return the game so that other modules can use its id as reference
         // -----------------------------------------------------------------------------
-        return this.m_gameRooms[gameId];
+        return this.m_gameRooms[index];
     };
 
 
@@ -56,11 +57,12 @@ function GameRoomManager () {
 
         for (var indexOfRoom = 0; indexOfRoom < this.m_gameRooms.length; indexOfRoom++) 
         {
-            if(this.m_gameRooms[indexOfRoom].getId() === _id) 
+            if(this.m_gameRooms[indexOfRoom].m_data.getId() === _id) 
             {
                 gameRoom = this.m_gameRooms[indexOfRoom];
                 break;
             }
+
         }
 
         return gameRoom;

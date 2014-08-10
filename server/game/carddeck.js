@@ -101,7 +101,7 @@ function CardDeck () {
     	for (var indexOfCard = this.m_distributedCards.length - 1; indexOfCard >= 0; indexOfCard--) 
         {
     		var card = this.m_distributedCards.pop();
-            card.setPlayerId(0);
+            card.playerId = 0;
             
     		this.m_availableCards.push(card);
     	}

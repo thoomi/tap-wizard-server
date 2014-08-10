@@ -31,7 +31,9 @@ global.events = {
             GUESS_TRICKS:      'guess_tricks'
         },
         out: {
+            NEW_GAME_CREATED:       'new_game_created',
             PLAYER_JOINED_GAME:     'player_joined_game',
+            PLAYER_LEFT_GAME:       'player_left_game',
             NOT_ENOUGH_PLAYERS:     'not_enough_players',
             GAME_STARTS:            'game_starts',
             NEW_ROUND_STARTS:       'new_round_starts',
@@ -46,7 +48,7 @@ global.events = {
             PLAYER_HAS_WON_TRICK:   'player_has_won_trick',
             ROUND_IS_OVER:          'round_is_over',
             GAME_IS_OVER:           'game_is_over',
-            ERROR:                  'error'
+            ERROR:                  'custom_error'
         }
 };
 
@@ -57,7 +59,8 @@ global.events = {
 ////////////////////////////////////////////////////////////////////////////////
 function GameServer () {
 
-    this.PORT = 3000;
+    this.PORT   = 3000;
+    this.ORIGIN = 'http://localhost:9000';
 
     this.m_gameRoomManager = null;
     this.m_playerFactory   = null;
@@ -78,6 +81,16 @@ function GameServer () {
 
         this.initializeEventListeners();
 
+        // -----------------------------------------------------------------------------
+        // Set the origins which are allowed to access the socket connection
+        // -----------------------------------------------------------------------------
+        this.m_io.origins(this.ORIGIN);
+
+        // -----------------------------------------------------------------------------
+        // Keep the socket server up and listening on the specified port. If a socket 
+        // connection comes in, the events defined in "initializeEventListeners" get
+        // fired.
+        // -----------------------------------------------------------------------------
         this.m_io.listen(this.PORT);
     };
 
@@ -97,7 +110,9 @@ function GameServer () {
     /// \brief Sets up all listeners to possible network socket events.
     ////////////////////////////////////////////////////////////////////////////////
     this.initializeEventListeners = function() {
-        this.m_io.on(global.events.in.CONNECT, function(_socket) {
+        var gameServer = this;
+
+        gameServer.m_io.on(global.events.in.CONNECT, function(_socket) {
             console.info('Socket connected %s', _socket.id);
 
 
@@ -113,7 +128,7 @@ function GameServer () {
                 // -----------------------------------------------------------------------------
                 // Look if a client object is associated with the socket.
                 // -----------------------------------------------------------------------------
-                var client = this.m_clientManager.getClientBySocketId(socket.id);
+                var client = gameServer.m_clientManager.getClientBySocketId(socket.id);
 
                 if (client)
                 {
@@ -125,14 +140,14 @@ function GameServer () {
                         // -----------------------------------------------------------------------------
                         // Get the game room associated with the client.
                         // -----------------------------------------------------------------------------
-                        var gameRoom = this.m_gameRoomManager.getRoomById(client.gameRoomId);
+                        var gameRoom = gameServer.m_gameRoomManager.getRoomById(client.gameRoomId);
 
                         if (gameRoom.playerLeave(client.playerId))
                         {
                             // -----------------------------------------------------------------------------
                             // Player left room thus remove the client.
                             // -----------------------------------------------------------------------------
-                            this.m_clientManager.removeClientBySocketId(socket.id);
+                            gameServer.m_clientManager.removeClientBySocketId(socket.id);
                         }
                         else 
                         {
@@ -174,7 +189,7 @@ function GameServer () {
                 // -----------------------------------------------------------------------------
                 // Get the requestet game room
                 // -----------------------------------------------------------------------------
-                var gameRoom = this.m_gameRoomManager.getRoomById(_data.gameRoomId);
+                var gameRoom = gameServer.m_gameRoomManager.getRoomById(_data.gameRoomId);
 
                 if (gameRoom)
                 {
@@ -210,9 +225,9 @@ function GameServer () {
                 // -----------------------------------------------------------------------------
                 // Create a client for the socket which wants to create the game.
                 // -----------------------------------------------------------------------------
-                var gameTableClient = this.m_clientManager.createNewClient(Client.Types.GAME_TABLE, socket);
+                var gameTableClient = gameServer.m_clientManager.createNewClient(Client.Types.GAME_TABLE, socket);
 
-                var newGameRoom = this.m_gameRoomManager.createNewGameRoom(gameTableClient);
+                var newGameRoom = gameServer.m_gameRoomManager.createNewGameRoom(gameTableClient);
 
                 // -----------------------------------------------------------------------------
                 // Save the game room id also on the client.
@@ -244,7 +259,7 @@ function GameServer () {
                 // -----------------------------------------------------------------------------
                 // Get game room and prepare for the start of the game
                 // -----------------------------------------------------------------------------
-                var gameRoom = this.m_gameRoomManager.getRoomById(_data.gameRoomId);
+                var gameRoom = gameServer.m_gameRoomManager.getRoomById(_data.gameRoomId);
 
                 if (gameRoom)
                 {
@@ -270,7 +285,7 @@ function GameServer () {
                 var socket = this;
 
 
-                var gameRoom = this.m_gameRoomManager.getRoomById(_data.gameRoomId);
+                var gameRoom = gameServer.m_gameRoomManager.getRoomById(_data.gameRoomId);
 
                 if (gameRoom)
                 {
@@ -299,15 +314,15 @@ function GameServer () {
                 // -----------------------------------------------------------------------------
                 // Check if the requested game room exists
                 // -----------------------------------------------------------------------------
-                var gameRoom = this.m_gameRoomManager.getRoomById(_data.gameRoomId);
+                var gameRoom = gameServer.m_gameRoomManager.getRoomById(_data.gameRoomId);
 
                 if (gameRoom)
                 {
                     // -----------------------------------------------------------------------------
                     // Create a new client, player and connect them
                     // -----------------------------------------------------------------------------
-                    var newClient = this.m_clientManager.createNewClient(Client.Types.PLAYER, socket);
-                    var newPlayer = this.m_playerFactory.createNewPlayerWithName(_data.playerName);
+                    var newClient = gameServer.m_clientManager.createNewClient(Client.Types.PLAYER, socket);
+                    var newPlayer = gameServer.m_playerFactory.createNewPlayerWithName(_data.playerName);
 
                     newPlayer.setClient(newClient);
 
@@ -316,7 +331,7 @@ function GameServer () {
                     // -----------------------------------------------------------------------------
                     // Save the game room id and the player id on the client
                     // -----------------------------------------------------------------------------
-                    newClient.gameRoomId = gameRoom.getId();
+                    newClient.gameRoomId = gameRoom.m_data.getId();
                     newClient.playerId   = newPlayer.getId();
 
                     // -----------------------------------------------------------------------------
@@ -324,7 +339,7 @@ function GameServer () {
                     // the client will get a confirmation message, that his join attempt endet 
                     // successfully.
                     // -----------------------------------------------------------------------------
-                    _done();
+                    _done({ playerId: newPlayer.getId()});
                 }
                 else 
                 {
@@ -347,7 +362,7 @@ function GameServer () {
                 var socket = this;
 
                 
-                var gameRoom = this.m_gameRoomManager.getRoomById(_data.gameRoomId);
+                var gameRoom = gameServer.m_gameRoomManager.getRoomById(_data.gameRoomId);
 
                 if (gameRoom)
                 {
@@ -366,14 +381,14 @@ function GameServer () {
             /// \brief This event usually gets fired by a player / client in order to guess
             /// the tricks for the current round in the game room.
             ///
-            /// \params _data.gameRoomId
+            /// \params _data.gameRoomId, _data.numberOfGuessedTricks
             ////////////////////////////////////////////////////////////////////////////////
             _socket.on(global.events.in.GUESS_TRICKS, function(_data) {
                 console.info('GUESS_TRICKS event for Socket: %s', this.id);
                 var socket = this;
 
                 
-                var gameRoom = this.m_gameRoomManager.getRoomById(_data.gameRoomId);
+                var gameRoom = gameServer.m_gameRoomManager.getRoomById(_data.gameRoomId);
 
                 if (gameRoom)
                 {

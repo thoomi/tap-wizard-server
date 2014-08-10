@@ -23,7 +23,7 @@ function PlayerFactory () {
     ///
     /// \return A fresh palyer object
     ////////////////////////////////////////////////////////////////////////////////
-    this.createPlayerWithName = function (_name) {
+    this.createNewPlayerWithName = function (_name) {
         // -----------------------------------------------------------------------------
         // TODO: Develop a proper way to generate a unique player id
         // -----------------------------------------------------------------------------
