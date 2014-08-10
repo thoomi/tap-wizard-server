@@ -148,6 +148,9 @@ function GameRoom (_gameId) {
         var player = null;
         var indexOfPlayer = this.getIndexOfPlayerById(_id);
 
+        console.log('ID: ' + _id);
+        console.log('Index: ' + indexOfPlayer);
+
         if (indexOfPlayer !== -1)
         {
             player = this.players[indexOfPlayer];

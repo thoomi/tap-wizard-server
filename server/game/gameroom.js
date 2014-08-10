@@ -26,8 +26,8 @@ function GameRoom (_gameId, _gameTableClient) {
     this.m_data          = new GameRoomData(_gameId);
     this.gameTableClient = _gameTableClient;
 
-    this.m_maxRounds       = 0;
-    this.m_currentRound    = 0;
+    this.m_maxRounds       = 20;
+    this.m_currentRound    = 1;
     this.m_indexOfDealer   = 0;
     this.m_trumpCard       = null;
     this.m_lastTrickWinner = null;
@@ -109,7 +109,7 @@ function GameRoom (_gameId, _gameTableClient) {
         // -----------------------------------------------------------------------------
         if (!this.isLastRound())
         {
-            this.m_trumpCard = this.m_currentRound.cardDeck.getCard();
+            this.m_trumpCard = this.m_data.cardDeck.getCard();
 
             var networkData = {
                 card : this.m_trumpCard
@@ -122,7 +122,7 @@ function GameRoom (_gameId, _gameTableClient) {
         // -----------------------------------------------------------------------------
         for (var indexOfPlayer = 0; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++)
         {
-            this.m_data.players[indexOfPlayer].initializeNewRound();
+            this.m_data.players[indexOfPlayer].initializeNewRound(this.m_currentRound);
         }
 
         // -----------------------------------------------------------------------------
@@ -262,7 +262,7 @@ function GameRoom (_gameId, _gameTableClient) {
             // Determine the winner of the current trick turn
             // ----------------------------------------------------------------------------
             var trickWinnerPlayerId = this.determineTrickWinner();
-            var trickWinnerPlayer   = this.m_data.getPlayerId(trickWinnerPlayerId);
+            var trickWinnerPlayer   = this.m_data.getPlayerById(trickWinnerPlayerId);
 
             trickWinnerPlayer.m_stats.incrementWonTricks();
             this.m_playedTricks++;
@@ -292,7 +292,7 @@ function GameRoom (_gameId, _gameTableClient) {
 
             this.emitToAll(global.events.out.ROUND_IS_OVER, networkData);
 
-            this.m_resetForNextRound();
+            this.resetForNextRound();
 
             // ----------------------------------------------------------------------------
             // Determine the next dealer by cycling through the players array
@@ -701,7 +701,7 @@ function GameRoom (_gameId, _gameTableClient) {
 
         for (var indexOfPlayer = 0; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++) 
         {
-            result = this.m_data.players[indexOfPlayer].m_stats.hashasGuessedTricks();
+            result = this.m_data.players[indexOfPlayer].m_stats.hasGuessedTricks();
         }
 
         return result;

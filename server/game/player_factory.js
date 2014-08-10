@@ -28,7 +28,7 @@ function PlayerFactory () {
         // TODO: Develop a proper way to generate a unique player id
         // -----------------------------------------------------------------------------
         numberOfCreatedPlayers++;
-        var playerId = 100 + numberOfCreatedPlayers;
+        var playerId = (100 + numberOfCreatedPlayers).toString();
 
         // -----------------------------------------------------------------------------
         // Instantiate a new player
