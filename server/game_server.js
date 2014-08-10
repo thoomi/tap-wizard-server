@@ -45,6 +45,7 @@ global.events = {
             PLAYER_HAS_THROWN_CARD: 'player_has_thrown_card',
             PLAYER_HAS_WON_TRICK:   'player_has_won_trick',
             ROUND_IS_OVER:          'round_is_over',
+            GAME_IS_OVER:           'game_is_over',
             ERROR:                  'error'
         }
 };
