@@ -201,7 +201,7 @@ function GameServer () {
 
                 if (gameRoom)
                 {
-                    if (_data.typeOfClient === Client.Types.GAMETABLE)
+                    if (_data.typeOfClient === Client.Types.PLAYER)
                     {
                         var player = gameRoom.m_data.getPlayerById(_data.playerId);
                         if (player)
@@ -209,8 +209,9 @@ function GameServer () {
                             player.getClient().setSocket(socket);
                         }
                     }
-                    else if (_data.typeOfClient === Client.Types.PLAYER)
+                    else if (_data.typeOfClient === Client.Types.GAME_TABLE)
                     {
+                        
                         gameRoom.gameTableClient.setSocket(socket);
                     }
                 }
