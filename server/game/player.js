@@ -120,9 +120,9 @@ function Player (_params) {
         for (var indexOfCard = 0; indexOfCard < this.m_setOfCards.length; indexOfCard++) 
         {   
             // -----------------------------------------------------------------------------
-            // Check if color and value match.
+            // Check if suit and value match.
             // -----------------------------------------------------------------------------
-            if(this.m_setOfCards[indexOfCard].color === _card.color && this.m_setOfCards[indexOfCard].value === _card.value) 
+            if(this.m_setOfCards[indexOfCard].suit === _card.suit && this.m_setOfCards[indexOfCard].value === _card.value) 
             {
                 this.m_setOfCards.splice(indexOfCard, 1);
             }

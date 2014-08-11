@@ -142,7 +142,7 @@ function GameServer () {
                         // -----------------------------------------------------------------------------
                         var gameRoom = gameServer.m_gameRoomManager.getRoomById(client.gameRoomId);
 
-                        if (gameRoom.playerLeave(client.playerId))
+                        if (gameRoom && gameRoom.playerLeave(client.playerId))
                         {
                             // -----------------------------------------------------------------------------
                             // Player left room thus remove the client.
@@ -168,6 +168,14 @@ function GameServer () {
                         //      still isn't set.
                         // -----------------------------------------------------------------------------
                         client.setSocket(null);
+
+                        // -----------------------------------------------------------------------------
+                        // Clear game room in debug mode
+                        // -----------------------------------------------------------------------------
+                        if (process.env.NODE_ENV === 'development') 
+                        { 
+                            gameServer.m_gameRoomManager.deleteRoomWithId(client.gameRoomId);
+                        }
                     }
                 }
             });

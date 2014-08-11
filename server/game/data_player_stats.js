@@ -12,9 +12,9 @@ module.exports = exports = PlayerStats;
 /// \brief The stats data for one round
 ////////////////////////////////////////////////////////////////////////////////
 function RoundData() {
-    this.numberOfGuessedTricks = -1;
-    this.numberOfWonTricks     = -1;
-    this.score                 = -1;
+    this.numberOfGuessedTricks = 0;
+    this.numberOfWonTricks     = 0;
+    this.score                 = 0;
 }
 
 
@@ -58,7 +58,7 @@ function PlayerStats () {
 
     this.calculateRoundScore = function(_roundNumber) {
         var guessedTricks   = this.m_roundData[_roundNumber].numberOfGuessedTricks;
-        var wonTricks       = this.m_roundData[_roundNumber].wonTricks;
+        var wonTricks       = this.m_roundData[_roundNumber].numberOfWonTricks;
         var trickDifference = Math.abs(guessedTricks - wonTricks);
         var roundScore      = 0;
 

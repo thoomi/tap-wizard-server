@@ -96,6 +96,14 @@ function GameRoom (_gameId, _gameTableClient) {
         this.emitToAll(global.events.out.NEW_ROUND_STARTS, data);
 
         // -----------------------------------------------------------------------------
+        // Initialize new round for each player
+        // -----------------------------------------------------------------------------
+        for (var indexOfPlayer = 0; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++)
+        {
+            this.m_data.players[indexOfPlayer].initializeNewRound(this.m_currentRound);
+        }
+
+        // -----------------------------------------------------------------------------
         // Reset card deck, shuffle and deal the cards
         // -----------------------------------------------------------------------------
         this.m_data.cardDeck.reset();
@@ -115,14 +123,6 @@ function GameRoom (_gameId, _gameTableClient) {
                 card : this.m_trumpCard
             };
             this.gameTableClient.emit(global.events.out.NEW_TRUMP_CARD, networkData);
-        }
-
-        // -----------------------------------------------------------------------------
-        // Initialize new round for each player
-        // -----------------------------------------------------------------------------
-        for (var indexOfPlayer = 0; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++)
-        {
-            this.m_data.players[indexOfPlayer].initializeNewRound(this.m_currentRound);
         }
 
         // -----------------------------------------------------------------------------
@@ -373,7 +373,7 @@ function GameRoom (_gameId, _gameTableClient) {
             var player = this.m_data.players[indexOfPlayer];
 
             player.m_stats.calculateRoundScore(this.m_currentRound);
-
+            
             // ----------------------------------------------------------------------------
             // Save the individual player score into the scores object with the player id
             // as the key
@@ -578,7 +578,7 @@ function GameRoom (_gameId, _gameTableClient) {
             }
 
             // ----------------------------------------------------------------------------
-            // Check if the if there is already a played suit (other than wizard or fool)
+            // Check if there is already a played suit (other than wizard or fool)
             // ----------------------------------------------------------------------------
             if (this.m_firstPlayedSuit === null)
             {

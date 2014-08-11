@@ -56,10 +56,11 @@ module.exports = function (grunt) {
             dev: {
                 script: 'index.js',
                 options: {
-                    watch: ['server', 'index.js']/*,
+                    watch: ['server', 'index.js'],
                     env: {
-                        DEBUG: 'engine*'
-                    }*/
+                        /*DEBUG: 'engine*'*/
+                        NODE_ENV: 'development'
+                    }
                 }
             }
         },

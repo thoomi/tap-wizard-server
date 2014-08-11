@@ -31,6 +31,8 @@ function GameRoomManager () {
         // -----------------------------------------------------------------------------
         var gameId = (( Math.random() * 1000 ) | 0).toString();
 
+        if (process.env.NODE_ENV === 'development') { gameId = '111'; }
+        
         // -----------------------------------------------------------------------------
         // Instantiate a new game room and save it to the array
         // -----------------------------------------------------------------------------
@@ -66,5 +68,26 @@ function GameRoomManager () {
         }
 
         return gameRoom;
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////
+    /// \fn deleteRoomWithId(_id)
+    ///
+    /// \brief Deletes the specified room by id
+    ///
+    /// \param _id The id of the room to look for
+    ////////////////////////////////////////////////////////////////////////////////
+    this.deleteRoomWithId = function (_id) {
+        for (var indexOfRoom = 0; indexOfRoom < this.m_gameRooms.length; indexOfRoom++) 
+        {
+            if(this.m_gameRooms[indexOfRoom].m_data.getId() === _id) 
+            {   
+                this.m_gameRooms[indexOfRoom] = null;
+                this.m_gameRooms.splice(indexOfRoom, 1);
+
+                break;
+            }
+
+        }
     };
 }
