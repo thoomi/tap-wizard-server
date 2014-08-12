@@ -1,6 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Dependencies
 ////////////////////////////////////////////////////////////////////////////////
+var CORE  = CORE || {};
+CORE.util = require('./core/core_util.js');
+
 var Client          = require('./game/client.js');
 var ClientManager   = require('./game/client_manager.js');
 var GameRoomData    = require('./game/data_gameroom.js');
@@ -361,7 +364,7 @@ function GameServer () {
                 }
                 else 
                 {
-                    socket.emit(global.events.out.ERROR, "The requested game room does not exist.");
+                    socket.emit(global.events.out.ERROR, CORE.util.Error.RoomNotFound);
                 }
             });
             

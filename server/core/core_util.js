@@ -114,3 +114,16 @@ util.Queue = function() {
         return item;
     };
 };
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// This is a very simple error object. This gets usually send to the clients.
+////////////////////////////////////////////////////////////////////////////////
+util.Error = function(_type, _message) {
+    return {
+        type: _type,
+        message: _message
+    }
+};
+
+util.Error.RoomNotFound = util.Error('Room not found!', 'The room your were trying to join does not exist.');
