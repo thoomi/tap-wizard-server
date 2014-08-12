@@ -12,7 +12,7 @@ module.exports = exports = PlayerStats;
 /// \brief The stats data for one round
 ////////////////////////////////////////////////////////////////////////////////
 function RoundData() {
-    this.numberOfGuessedTricks = 0;
+    this.numberOfGuessedTricks = -1;
     this.numberOfWonTricks     = 0;
     this.score                 = 0;
 }

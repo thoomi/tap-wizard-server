@@ -107,7 +107,7 @@ function Client (_type, _socket) {
             };
             this.m_messageQueue.enqueue(networkEvent);
 
-            console.log('Client socket is not set. Message added to queue.');
+            console.log('Client socket is not set. Message: ' + _message);
         }
     };
 }

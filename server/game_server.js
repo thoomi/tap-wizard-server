@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 var Client          = require('./game/client.js');
 var ClientManager   = require('./game/client_manager.js');
+var GameRoomData    = require('./game/data_gameroom.js');
 var GamRoomManager  = require('./game/gameroom_manager.js');
 var PlayerFactory   = require('./game/player_factory.js');
 var SocketIoServer  = require('socket.io');
@@ -327,28 +328,36 @@ function GameServer () {
 
                 if (gameRoom)
                 {
-                    // -----------------------------------------------------------------------------
-                    // Create a new client, player and connect them
-                    // -----------------------------------------------------------------------------
-                    var newClient = gameServer.m_clientManager.createNewClient(Client.Types.PLAYER, socket);
-                    var newPlayer = gameServer.m_playerFactory.createNewPlayerWithName(_data.playerName);
+                    if (gameRoom.m_data.getState() === GameRoomData.States.WAITING_FOR_PLAYERS)
+                    {
+                        // -----------------------------------------------------------------------------
+                        // Create a new client, player and connect them
+                        // -----------------------------------------------------------------------------
+                        var newClient = gameServer.m_clientManager.createNewClient(Client.Types.PLAYER, socket);
+                        var newPlayer = gameServer.m_playerFactory.createNewPlayerWithName(_data.playerName);
 
-                    newPlayer.setClient(newClient);
+                        newPlayer.setClient(newClient);
 
-                    gameRoom.playerJoin(newPlayer);
+                        gameRoom.playerJoin(newPlayer);
 
-                    // -----------------------------------------------------------------------------
-                    // Save the game room id and the player id on the client
-                    // -----------------------------------------------------------------------------
-                    newClient.gameRoomId = gameRoom.m_data.getId();
-                    newClient.playerId   = newPlayer.getId();
+                        // -----------------------------------------------------------------------------
+                        // Save the game room id and the player id on the client
+                        // -----------------------------------------------------------------------------
+                        newClient.gameRoomId = gameRoom.m_data.getId();
+                        newClient.playerId   = newPlayer.getId();
 
-                    // -----------------------------------------------------------------------------
-                    // This callback function has been passed in from the client. By calling it
-                    // the client will get a confirmation message, that his join attempt endet 
-                    // successfully.
-                    // -----------------------------------------------------------------------------
-                    _done({ playerId: newPlayer.getId()});
+                        // -----------------------------------------------------------------------------
+                        // This callback function has been passed in from the client. By calling it
+                        // the client will get a confirmation message, that his join attempt endet 
+                        // successfully.
+                        // -----------------------------------------------------------------------------
+                        _done({ playerId: newPlayer.getId()});
+                    }
+                    else
+                    {
+                        socket.emit(global.events.out.ERROR, "Not allowed to join game.");
+                    }
+                    
                 }
                 else 
                 {

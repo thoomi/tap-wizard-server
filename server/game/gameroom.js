@@ -697,14 +697,15 @@ function GameRoom (_gameId, _gameTableClient) {
     /// \brief Checks if every player has guessed the tricks for the current round
     ////////////////////////////////////////////////////////////////////////////////
     this.hasEveryPlayerGuessedTricks = function() {
-        var result = false;
-
         for (var indexOfPlayer = 0; indexOfPlayer < this.m_data.getNumberOfPlayers(); indexOfPlayer++) 
         {
-            result = this.m_data.players[indexOfPlayer].m_stats.hasGuessedTricks();
+            if (this.m_data.players[indexOfPlayer].m_stats.hasGuessedTricks() === false)
+            {
+                return false;
+            }
         }
 
-        return result;
+        return true;
     };
 
     ////////////////////////////////////////////////////////////////////////////////
